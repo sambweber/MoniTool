@@ -1,51 +1,69 @@
 
+
 # -------------------------------------------------------------------------------------------------------------------------
 # MT_prep 
 # -------------------------------------------------------------------------------------------------------------------------
 
 #' Puts data in right format for a MoniTool model run
 #
-#' @param data is a dataframe which must have a column called 'dateend' which was the date on which 
+#' @param data is a dataframe which must have a column called 'date' which was the date on which 
 #' the count was done, along with at least one of columns entitled'nests' or 'activities' (can be both). 
 #' May also optionally have columns called 'beach' to differentiate sites, and 'season' to name nesting 
-#' seasons. If 'season' is missing, this will be calculated automatically from the dates. 
+#' seasons. If 'season' is missing it will be guessed from the dates provided.  
 
+#' @param max.days is a number giving the maximum number of days over which the counted
+#' activities may have occurred. So `max.days = 1` means all activities occurred on the
+#' the night before survey was done (for morning counts). For `max.days > 1` counted
+#' activities are assumed to have occurred over all days since the previous count, up to 
+#' a maximum of `date - max.days`. This requires you to make some informed assumption about 
+#' how many days activities remain visible for. For more complex monitoring designs it is
+#' also possible to include a column in `data` called `start.date` which contains the earliest dates
+#' when counts in each survey could have occurred. For example, if tracks were obliterated two days
+#' before the survey on some occassions, then `start.date` could be set to two days before the
+#' `date - 2 days` for these observations and to `max.days` for the remainder.
+#' 
+#' @season_start is a character vector giving a nominal start date for the nesting season. The value
+#' is used to convert dates in `data` to the number of days since the start of the nesting season.
+#' 
+#' @param min.obs is a single numeric giving the minimum number of observations that are needed 
+#' for a given beach in a given season to fit a model. Beaches with `< min.obs` counts will 
+#' be removed from the data
 
-MT_prep = function(data, season_start, max.window = 1, min.obs = 5, sites_seperate = FALSE){
+MT_prep = function(data, season_start, max.days = 1, min.obs = 10){
   
-  if(!has_name(data,'dateend')) stop('Data must contain a column called dateend')
+  if(!has_name(data,'date')) stop('Data must contain a column called date')
   
-  data %<>% mutate(reference_date = set_ref_date(dateend,season_start), 
-                   day = as.numeric(dateend - reference_date))
+  data %<>% mutate(reference_date = set_ref_date(date,season_start), 
+                   day = as.numeric(date - reference_date))
   
   if(!has_name(data,'season')) {
     
-  data %<>% group_by(reference_date) %>%
-  mutate(season = max(year(dateend))) %>% rowwise()  %>%
-  mutate(season = factor(paste(unique(c(year(reference_date),season)),collapse='-')))    
-      
+    data %<>% group_by(reference_date) %>%
+      mutate(season = max(year(date))) %>% rowwise()  %>%
+      mutate(season = factor(paste(unique(c(year(reference_date),season)),collapse='-')))    
+    
   }
   
   if(!has_name(data,'datestart')) {
-  
-  data %<>% group_by(across(any_of(c('season','Beach')))) %>%
-  mutate(window = map_dbl(diff(c(-1,day)),~min(.x,max.window)), datestart = dateend-window)
-      
-  } else data %<>% mutate(window = dateend-datestart)
+    
+    data %<>% group_by(across(any_of(c('season','beach')))) %>%
+      mutate(window = map_dbl(diff(c(-1,day)),~min(.x,max.days)), datestart = date-window)
+    
+  } else data %<>% mutate(window = date-datestart)
   
   # Remove beaches that have too few counts to be effectively modelled
-  data %<>% group_by(across(any_of(c('season','Beach')))) %>%
-  mutate(too_few = n()<=min.obs) %>% ungroup()
+  data %<>% group_by(across(any_of(c('season','beach')))) %>%
+    mutate(too_few = n()<=min.obs) %>% ungroup()
   
   if(sum(data$too_few)>1){
     cat('The following seasons/beaches have insufficient data and have been removed:\n\n')
-    print(data.frame(distinct(subset(data,too_few),season,Beach)),row.names = F)
+    print(data.frame(distinct(subset(data,too_few),season,beach)),row.names = F)
   }
   
   # Prep final output
   subset(data,!too_few) %>%
-  dplyr::select(any_of(c('season','Beach','day','datestart','dateend','window')),everything(),-too_few) %>%
-  nest(data = -c(season,reference_date)) %>%
-  mutate(data = map(data, droplevels))
-
+    dplyr::select(any_of(c('season','beach','day','datestart','date','window')),everything(),-too_few) %>%
+    nest(data = -c(season,reference_date)) %>%
+    mutate(data = map(data, droplevels))
+  
 }
