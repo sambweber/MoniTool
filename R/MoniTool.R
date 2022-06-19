@@ -23,7 +23,8 @@
 #' `date - 2 days` for these observations and to `max.days` for the remainder.
 #' 
 #' @season_start is a character vector giving a nominal start date for the nesting season. The value
-#' is used to convert dates in `data` to the number of days since the start of the nesting season.
+#' is used to convert dates in `data` to the number of days since the start of the nesting season. 
+#' Should be in format %d%B or %B%d (e.g. '1 November', 'Dec 31', '12 Jul')
 #' 
 #' @param min.obs is a single numeric giving the minimum number of observations that are needed 
 #' for a given beach in a given season to fit a model. Beaches with `< min.obs` counts will 
@@ -67,3 +68,20 @@ MT_prep = function(data, season_start, max.days = 1, min.obs = 10){
     mutate(data = map(data, droplevels))
   
 }
+
+# -----------------------------------------------------------------------------------
+# set_ref_date
+# -----------------------------------------------------------------------------------
+
+#' Used internally by `MT_prep` to adjust dates using a reference date. 
+
+#' @param x A vector of class `Date` to be adjusted
+#' @param ref_date A character vector giving the reference date in format %d%B or %B%d (e.g. '1 November', 'Dec 31')
+
+set_ref_date = 
+  function(x,ref_date){
+    stopifnot('First variable should be a Date vector' = is(x,'Date')) 
+    ref_date = as.Date(parse_date_time(paste(ref_date,year(x)),c('dBY','BdY'))) 
+    if_else(x >= ref_date,ref_date,ref_date - years(1))
+  }
+
