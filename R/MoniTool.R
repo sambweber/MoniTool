@@ -17,9 +17,9 @@
 #' activities are assumed to have occurred over all days since the previous count, up to 
 #' a maximum of `date - max.days`. This requires you to make some informed assumption about 
 #' how many days activities remain visible for. For more complex monitoring designs it is
-#' also possible to include a column in `data` called `start.date` which contains the earliest dates
+#' also possible to include a column in `data` called `datestart` which contains the earliest dates
 #' when counts in each survey could have occurred. For example, if tracks were obliterated two days
-#' before the survey on some occassions, then `start.date` could be set to two days before the
+#' before the survey on some occassions, then `datestart` could be set to two days before the
 #' `date - 2 days` for these observations and to `max.days` for the remainder.
 #' 
 #' @season_start is a character vector giving a nominal start date for the nesting season. The value
