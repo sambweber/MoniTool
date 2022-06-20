@@ -71,3 +71,37 @@ MT_append_observed = function(preds,data){
 
 }
 
+# ----------------------------------------------------------------------------------------------------------
+# MT_meanCI: Returns the mean and credible interval for counts on each day/site for plotting seasonal trends
+# ----------------------------------------------------------------------------------------------------------
+
+MT_meanCI = function(preds,by_site=T,interval = 0.95){
+  
+  group_by(preds,y.var,day,.draw) %>%
+  {if(by_site & has_name(predictions,'beach')) group_by(.,beach,.add=T) else .} %>%
+  summarise(Y = sum(Y),.groups = 'keep') %>%
+  ungroup(.,.draw) %>% mean_qi(Y,.width = interval) %>% 
+  dplyr::select(-(.width:.interval)) %>%
+  ungroup()
+  
+}
+  
+# ----------------------------------------------------------------------------------------------------------
+# MT_totalCI: Calculates the total number of activities per site or overall along with associated credible intervals
+# ----------------------------------------------------------------------------------------------------------
+ 
+# We could optionally here allow use of the totals including observations (Y) or only predicted values (y.pred) to
+# assess changes in confidence intervals.
+
+MT_totalCI = function(predictions,by_site=T,interval=0.95,full.posterior=F){
+  
+  group_by(predictions,y.var,.draw) %>%
+  {if(by_site & has_name(predictions,'beach')) group_by(.,beach,.add=T) else .} %>%
+  summarise(Y = sum(Y),.groups = 'keep') %>% 
+  {if(!full.posterior){
+  ungroup(.,.draw) %>% mean_qi(Y,.width = interval) %>% 
+  dplyr::select(-(.width:.interval))
+  } else .} %>%
+  ungroup()
+  
+}
