@@ -1,3 +1,6 @@
+require(nimble)
+require(tidyverse)
+
 # -----------------------------------------------------------------------------
 # meanFnNim: code to create a nimbleFunction object containing the mean function
 # -----------------------------------------------------------------------------
