@@ -40,12 +40,12 @@ MT_predict = function(model,data,days,samples = 2000, append.observed = T){
   mutate(preds = pmap(.[arg.pos], ~map_dbl(days,function(t) meanFnNim(t,..1,..2,..3,..4,..5)))) %>%
   mutate(preds = map(preds, ~data.frame(day=days,mu = .x))) %>%
   dplyr::select(.draw,y.var,any_of('beach'),phi,preds) %>% unnest(cols=preds) %>%
-  mutate(y.pred = rnbinom(day,phi,mu=mu)) %>%
+  mutate(N.pred = rnbinom(day,phi,mu=mu)) %>%
   dplyr::select(-phi)
   
-  if(append.observed) samples %<>% MT_append_observed(data)
+  samples %<>% MT_append_observed(data)
   
-  return(sample)
+  return(samples)
 }
 
 # ----------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ MT_append_observed = function(preds,data){
   t = MT_diff_matrix(data$day,data$window)
 
   obs.days = dplyr::select(data,any_of(c('beach','day',unique(preds$y.var)))) %>%
-             gather('y.var','y.obs',-any_of(c('beach','day')))
+             gather('y.var','N.obs',-any_of(c('beach','day')))
   
   obs.days = 
     data.frame(t) %>% 
@@ -66,10 +66,10 @@ MT_append_observed = function(preds,data){
     dplyr::select(-.col) %>% 
     drop_na %>%
     left_join(obs.days) %>%
-    replace_na(list(y.obs = 0)) 
+    replace_na(list(N.obs = 0)) 
   
   preds %>% left_join(obs.days,by=intersect(c('day','beach','y.var'),names(obs.days))) %>%
-  mutate(Y = coalesce(y.obs,y.pred))
+  mutate(N = coalesce(N.obs,N.pred))
 
 }
 
