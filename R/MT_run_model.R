@@ -282,13 +282,13 @@ if(ncores>1){
 cat(paste('#Fitting',nrow(data),'models in parallel'))
 plan(tweak(multisession,workers = ncores))
 data = mutate(data,fit = furrr::future_map(data,MT_run_model,Pk = Pk,nchains=nchains,niter=niter, nburnin = nburnin, thin = this,
-                     parameters.to.monitor = params,init.attempts = init.attempts,init.control = init.control) 
+                     parameters.to.monitor = params,init.attempts = init.attempts,init.control = init.control)) 
 plan(sequential)
   
 } else {
   
 data = mutate(data,fit = purrr::map(data,MT_run_model,Pk = Pk,nchains=nchains,niter=niter, nburnin = nburnin, thin = this,
-                     parameters.to.monitor = params,init.attempts = init.attempts,init.control = init.control) 
+                     parameters.to.monitor = params,init.attempts = init.attempts,init.control = init.control)) 
   
   }
 }  
