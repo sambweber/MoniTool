@@ -22,10 +22,14 @@
 #' before the survey on some occassions, then `datestart` could be set to 
 #' `date - 2 days` for these observations and to `date - max.days` for the remainder.
 #' 
-#' @season_start is a character vector giving a nominal start date for the nesting season. The value
-#' is used to convert dates in `data` to the number of days since the start of the nesting season. 
+#' @reference.date is a character vector giving a nominal start date for the nesting season. 
 #' Should be in format %d%B or %B%d (e.g. '1 November', 'Dec 31', '12 Jul')
-#' 
+#' *Note* This is not the date when counts begin, but a date that defines where one nesting season ends and another begins.
+#' In year round nesting it will typically be the date of a seasonal low point. In other cases it will occur in a
+#' the middle of a period of zero counts (or assumed zeros) separating seasonal peaks. The value
+#' is used to convert dates in `data` to the number of days since the start of the nesting season (`day`) which is
+#' need for analysis. 
+
 #' @param min.obs is a single numeric giving the minimum number of observations that are needed 
 #' for a given beach in a given season to fit a model. Beaches with `< min.obs` counts will 
 #' be removed from the data
@@ -38,7 +42,7 @@ require(magrittr)
 require(dplyr)
 require(lubridate)
 
-MT_prep = function(data, season.start, max.days = 1, min.obs = 10, sites.together = F){
+MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, sites.together = F){
   
   if(!has_name(data,'date')) stop('Data must contain a column called date')
   if(!is(data$date,'Date')){
@@ -46,7 +50,7 @@ MT_prep = function(data, season.start, max.days = 1, min.obs = 10, sites.togethe
     if(is(data$date,'try-error')) stop("column 'date' should of class Date or in standard unambiguous format")
    }
   
-  data %<>% mutate(reference_date = set_ref_date(date,season.start), 
+  data %<>% mutate(reference_date = set_ref_date(date,reference.date), 
                    day = as.numeric(date - reference_date))
   
   if(has_name(data,'beach')) data$beach <- factor(data$beach)
@@ -79,11 +83,14 @@ MT_prep = function(data, season.start, max.days = 1, min.obs = 10, sites.togethe
   if(!sites.together) nest.vars = c(nest.vars,'beach')
   
   # Prep final output
-  subset(data,!too_few) %>%
+  data %<>% subset(!too_few) %>%
     droplevels() %>%
     dplyr::select(any_of(c('season','beach','day','datestart','date','window')),everything(),-too_few) %>%
     nest(data = -any_of(nest.vars)) 
   
+  class(data) <- c('MT_df',class(data))
+  
+  return(data)
 }
 
 # -----------------------------------------------------------------------------------
