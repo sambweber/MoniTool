@@ -260,6 +260,7 @@ cbuilt <- compileNimble(built)
 fit = runMCMC(cbuilt, nchains = nchains, niter = niter, nburnin = nburnin, inits = inits, thin = thin,
         progressBar = TRUE, samplesAsCodaMCMC = TRUE)
 
+class(fit) <- c('MTfit',class(fit))
 attr(fit,'y.names') <- model$origData$y.names
 
 return(fit)
