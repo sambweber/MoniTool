@@ -237,15 +237,21 @@ init.control = function() list(smin = 0.01,smax=10)
 #' @param init.attempts Number of attempts to make at finding a valid set of starting parameters for the model before 
 #' gracefully giving up.
 
-MT_run_model = function(model, nchains=2, niter=40000, nburnin = 10000, thin = 1,
+MT_run_model = function(data, Pk, nchains=2, niter=40000, nburnin = 10000, thin = 1,
                      parameters.to.monitor = c("alpha", "s1", "s2", "tf", "tp", "phi"),
                      init.attempts = 100,init.control = list(smin = 0.01,smax=10)) {
 
-## sample initial values
+assign('dSnbinomNim', dSnbinomNim, envir = .GlobalEnv)
+assign('rSnbinomNim', rSnbinomNim, envir = .GlobalEnv)  
+  
+cat('#Compiling model')
+model = MT_make_model(data,Pk)
 
+cat('#Initialising model')
 init.control = modifyList(init.control(),init.control)
 inits <- map(1:nchains, ~MT_initialize(model,attempts = init.attempts, smin = init.control$smin,smax=init.control$smax))
 
+cat('#Configuring model')
 config <- configureMCMC(model, monitors = parameters.to.monitor, thin = thin)
 built  <- buildMCMC(config)
 cbuilt <- compileNimble(built)
@@ -261,5 +267,27 @@ return(fit)
 }
 
 
+# ----------------------------------------------------------------------------------------------------------------
+# MT_fit: Function for running a nimble model across multiple sites/seasons in a nested dataste produced by MT_prep
+# ----------------------------------------------------------------------------------------------------------------
+
+MT_fit <- function(data, Pk, nchains=2, niter=40000, nburnin = 10000, thin = 1,
+                     params = c("alpha", "s1", "s2", "tf", "tp", "phi"),
+                     init.attempts = 100,init.control = list(smin = 0.01,smax=10),ncores=1){
+ 
+if(ncores>1){
   
+cat(paste('#Fitting',nrow(data),'models in parallel')
+plan(tweak(multisession,workers = ncores))
+data = mutate(data,fit = furrr::future_map(data,MT_run_model,Pk = Pk,nchains=nchains,niter=niter, nburnin = nburnin, thin = this,
+                     parameters.to.monitor = params,init.attempts = init.attempts,init.control = init.control) 
+plan(sequential)
+  
+} else {
+  
+data = mutate(data,fit = purrr::map(data,MT_run_model,Pk = Pk,nchains=nchains,niter=niter, nburnin = nburnin, thin = this,
+                     parameters.to.monitor = params,init.attempts = init.attempts,init.control = init.control) 
+  
+  }
+}  
   
