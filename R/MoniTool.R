@@ -30,9 +30,17 @@
 #' for a given beach in a given season to fit a model. Beaches with `< min.obs` counts will 
 #' be removed from the data
 
+require(magrittr)
+require(dplyr)
+require(lubridate)
+
 MT_prep = function(data, season.start, max.days = 1, min.obs = 10){
   
   if(!has_name(data,'date')) stop('Data must contain a column called date')
+  if(!is(data$date,'Date')){
+    data$date = try(as.Date(data$Date)) 
+    if(is(data$date,'try-error')) stop("column 'date' should of class Date or in standard unambiguous format")
+   }
   
   data %<>% mutate(reference_date = set_ref_date(date,season.start), 
                    day = as.numeric(date - reference_date))
