@@ -279,7 +279,7 @@ if(!is(data,'MT_df')) stop('data should be a MT_df object created by MT_prep')
   
 if(ncores>1){
   
-cat(paste('#Fitting',nrow(data),'models in parallel')
+cat(paste('#Fitting',nrow(data),'models in parallel'))
 plan(tweak(multisession,workers = ncores))
 data = mutate(data,fit = furrr::future_map(data,MT_run_model,Pk = Pk,nchains=nchains,niter=niter, nburnin = nburnin, thin = this,
                      parameters.to.monitor = params,init.attempts = init.attempts,init.control = init.control) 
