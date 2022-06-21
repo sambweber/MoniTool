@@ -1,3 +1,5 @@
+require(tidybayes)
+
 # ----------------------------------------------------------------------------------
 # Function for sampling from the final model
 # ----------------------------------------------------------------------------------
@@ -52,7 +54,7 @@ MT_predict = function(model,data,days,samples = 2000, append.observed = T){
 
 MT_append_observed = function(preds,data){
 
-  t = diff_matrix(data$day,data$window)
+  t = MT_diff_matrix(data$day,data$window)
 
   obs.days = dplyr::select(data,any_of(c('beach','day',unique(preds$y.var)))) %>%
              gather('y.var','y.obs',-any_of(c('beach','day')))
