@@ -36,7 +36,7 @@ predict.MTfit = function(model,data,days,samples = 2000){
   args = formalArgs(meanFnNim) %>% subset(.!='t')
   arg.pos = match(args,names(samples))
 
-  if(missing(days)) days = range(data$day)
+  if(missing(days)) days = min(data$day):max(data$day)
   
   samples %<>%
   mutate(preds = pmap(.[arg.pos], ~map_dbl(days,function(t) meanFnNim(t,..1,..2,..3,..4,..5)))) %>%
