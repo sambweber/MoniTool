@@ -234,10 +234,10 @@ MT_initialize <- function(model, smin = 0.01, smax = 10, attempts = 100) {
 
 MT_run_model = function(model, nchains=2, niter=40000, nburnin = 10000, thin = 1,
                      parameters.to.monitor = c("alpha", "s1", "s2", "tf", "tp", "phi"),
-                     init.attempts = 100) {
+                     init.attempts = 100,init.control = list(smin = 0.01,smax=10)) {
 
 ## sample initial values
-inits <- map(1:nchains, ~MT_initialize(model,attempts = init.attempts))
+inits <- map(1:nchains, ~MT_initialize(model,attempts = init.attempts, smin = init.control$smin,smax=init.control$smax))
 
 config <- configureMCMC(model, monitors = parameters.to.monitor, thin = thin)
 built  <- buildMCMC(config)
