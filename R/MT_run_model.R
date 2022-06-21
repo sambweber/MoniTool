@@ -217,6 +217,11 @@ MT_initialize <- function(model, smin = 0.01, smax = 10, attempts = 100) {
   return(inits)
 }
 
+# ----------------------------------------------------------------------------------------------------------------
+# MT_run_model: Function for compiling and running the nimble model
+# ----------------------------------------------------------------------------------------------------------------
+                 
+init.control = function() list(smin = 0.01,smax=10)
 
 # ----------------------------------------------------------------------------------------------------------------
 # MT_run_model: Function for compiling and running the nimble model
@@ -237,6 +242,8 @@ MT_run_model = function(model, nchains=2, niter=40000, nburnin = 10000, thin = 1
                      init.attempts = 100,init.control = list(smin = 0.01,smax=10)) {
 
 ## sample initial values
+
+init.control = modifyList(init.control(),init.control)
 inits <- map(1:nchains, ~MT_initialize(model,attempts = init.attempts, smin = init.control$smin,smax=init.control$smax))
 
 config <- configureMCMC(model, monitors = parameters.to.monitor, thin = thin)
