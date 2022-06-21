@@ -29,7 +29,7 @@ rename(samples,y.var=Y)
 # if meanFnNim has a different number of arguments e.g. a different functional form as 
 # we expand the code later
 
-MT_predict = function(model,data,days,samples = 2000, append.observed = T){
+predict.MTfit = function(model,data,days,samples = 2000){
   
   samples = MT_sample(model,data,samples)
   
