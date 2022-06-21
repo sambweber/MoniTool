@@ -245,7 +245,7 @@ assign('dSnbinomNim', dSnbinomNim, envir = .GlobalEnv)
 assign('rSnbinomNim', rSnbinomNim, envir = .GlobalEnv)  
   
 cat('#Compiling model')
-model = MT_make_model(data,Pk)
+model = MT_make_model(data,Pk=Pk)
 
 cat('#Initialising model')
 init.control = modifyList(init.control(),init.control)
