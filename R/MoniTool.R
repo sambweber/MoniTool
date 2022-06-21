@@ -76,13 +76,13 @@ MT_prep = function(data, season.start, max.days = 1, min.obs = 10, sites.togethe
   }
   
   nest.vars = c('season','reference_data')
-  if(!sites.together & has_name(data,'beach')) nest.vars = c(nest.vars,'beach')
+  if(!sites.together) nest.vars = c(nest.vars,'beach')
   
   # Prep final output
   subset(data,!too_few) %>%
     droplevels() %>%
     dplyr::select(any_of(c('season','beach','day','datestart','date','window')),everything(),-too_few) %>%
-    nest(data = -nest.vars) 
+    nest(data = -any_of(nest.vars)) 
   
 }
 
