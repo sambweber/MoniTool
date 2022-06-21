@@ -67,7 +67,6 @@ MT_NimModel <- nimbleCode({
 })
 
 
-
 # ----------------------------------------------------------------------------------
 # MT_diff_matrix: Helper function for making a matrix containing the days observed in each sampling window
 # ----------------------------------------------------------------------------------
@@ -156,9 +155,9 @@ MT_initialize <- function(model, smin = 0.01, smax = 10, attempts = 100) {
   tdiffs = consts$t
   bch = consts$bch
   Pk = consts$Pk
-  i = 1
+  attempt = 1
 
-  while(valid == 0 & i < attempts) {
+  while(valid == 0 & attempt < attempts) {
     ## sample initial values from the priors
     
     alpha_mn <- matrix(rexp(B*R,1),nrow=R)
@@ -212,9 +211,9 @@ MT_initialize <- function(model, smin = 0.01, smax = 10, attempts = 100) {
     ## check validity of initial values
     model$setInits(inits)
     valid <- ifelse(!is.finite(model$calculate()), 0, 1)
-    i = i+1
+    attempt = attempt+1
   }
-  if(valid == 0) stop(paste('Model failed to initialize after',attempts,'attempts. Try adjusting smin and smax'))
+  if(valid == 0) stop(paste('Model failed to initialize after',attempts,'attempts. Try increasing attempts or adjusting smin and smax'))
   return(inits)
 }
 
