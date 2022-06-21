@@ -45,6 +45,8 @@ MT_prep = function(data, season.start, max.days = 1, min.obs = 10){
   data %<>% mutate(reference_date = set_ref_date(date,season.start), 
                    day = as.numeric(date - reference_date))
   
+  if(has_name(data,'beach')) data$beach <- factor(data$beach)
+  
   if(!has_name(data,'season')) {
     
     data %<>% group_by(reference_date) %>%
