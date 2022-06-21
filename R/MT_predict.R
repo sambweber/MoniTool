@@ -49,7 +49,25 @@ predict.MTfit = function(model,data,days,samples = 2000){
   
   return(samples)
 }
+                                           
+# ----------------------------------------------------------------------------------
+# MT_predict: Make predictions from an MT_tbl object
+# ----------------------------------------------------------------------------------
 
+MT_predict <- function(object,days,samples = 2000){
+  
+  if(!all(c('data','fit') %in% names(object))) stop ("object should be of class MT_tbl with columns 'data' and 'fit'")
+  
+  if(missing(days)){ 
+    days = bind_rows(object$data)$day
+    days = min(days):max(days)
+   }
+  
+  mutate(object,predict = map2(fit,data,predict,days=days,samples=samples))
+  
+  }
+  
+                                             
 # ----------------------------------------------------------------------------------
 # MT_append_observed: Replaces predictions with observed counts, where available
 # ----------------------------------------------------------------------------------
@@ -73,6 +91,18 @@ MT_append_observed = function(preds,data){
   preds %>% left_join(obs.days,by=intersect(c('day','beach','y.var'),names(obs.days))) %>%
   mutate(N = coalesce(N.obs,N.pred))
 
+}
+  
+# ----------------------------------------------------------------------------------------------------------
+# season_merge: Helper function to combine predictions for all sites within seasons for summarizing
+# ----------------------------------------------------------------------------------------------------------
+  
+season_merge = function(obj){
+  
+  dplyr::select(obj,any_of(c('season','reference_date','beach','predict'))) %>%
+  unnest(predict) %>% 
+  nest(predict = -(any_of(c('season','reference_date'))))
+   
 }
 
 # ----------------------------------------------------------------------------------------------------------
