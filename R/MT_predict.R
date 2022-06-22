@@ -134,9 +134,32 @@ MT_totalCI = function(predictions,by_site=T,interval=0.95,full.posterior=F){
   
   group_by(predictions,y.var,.draw) %>%
   {if(by_site & has_name(predictions,'beach')) group_by(.,beach,.add=T) else .} %>%
-  summarise(Y = sum(Y),.groups = 'keep') %>% 
+  summarise(N = sum(N),.groups = 'keep') %>% 
   {if(!full.posterior){
-  ungroup(.,.draw) %>% mean_qi(Y,.width = interval) %>% 
+  ungroup(.,.draw) %>% mean_qi(N,.width = interval) %>% 
+  dplyr::select(-(.width:.interval))
+  } else .} %>%
+  ungroup()
+  
+}
+
+  
+# ----------------------------------------------------------------------------------------------------------
+# MT_totalCI: Calculates proportions on beaches within seasons
+# ----------------------------------------------------------------------------------------------------------
+ 
+# We could optionally here allow use of the totals including observations (Y) or only predicted values (y.pred) to
+# assess changes in confidence intervals.
+
+MT_propCI = function(preds,interval=0.95,full.posterior=F){
+  
+  if(!has_name(preds,'beach')) stop ("can only calculate proportions where column 'beach' provided")
+  
+  group_by(preds,y.var,.draw,beach) %>%
+  summarise(N = sum(N),.groups = 'keep') %>% 
+  ungroup(beach) %>% mutate(proportion = N/sum(N)) %>% group_by(beach,.add=T) %>%  
+  {if(!full.posterior){
+  ungroup(.,.draw) %>% mean_qi(proportion,.width = interval) %>% 
   dplyr::select(-(.width:.interval))
   } else .} %>%
   ungroup()
