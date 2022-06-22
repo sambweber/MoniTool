@@ -109,12 +109,15 @@ season_merge = function(obj){
 # MT_meanCI: Returns the mean and credible interval for counts on each day/site for plotting seasonal trends
 # ----------------------------------------------------------------------------------------------------------
 
-MT_meanCI = function(preds,by_site=T,interval = 0.95){
+MT_meanCI = function(preds,by_site=T,interval = 0.95,what = c('counts','proportions')){
+  
+  what = match.arg(what)
   
   group_by(preds,y.var,day,.draw) %>%
-  {if(by_site & has_name(predictions,'beach')) group_by(.,beach,.add=T) else .} %>%
-  summarise(Y = sum(Y),.groups = 'keep') %>%
-  ungroup(.,.draw) %>% mean_qi(Y,.width = interval) %>% 
+  {if(by_site & has_name(preds,'beach')) group_by(.,beach,.add=T) else .} %>%
+  summarise(mu = sum(mu),.groups = 'keep') %>%
+  {if(what=='proportions') {ungroup(.,day) %>% mutate(mu = mu/sum(mu)) %>% group_by(day,.add=T)} else .} %>%
+  ungroup(.draw) %>% mean_qi(mu,.width = interval) %>% 
   dplyr::select(-(.width:.interval)) %>%
   ungroup()
   
