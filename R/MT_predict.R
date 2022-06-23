@@ -63,7 +63,7 @@ MT_predict <- function(object,days,samples = 2000){
     days = min(days):max(days)
    }
   
-  mutate(object,predict = map2(fit,data,predict,days=days,samples=samples))
+  mutate(object,predict = map2(fit,data,predict.MTfit,days=days,samples=samples))
   
   }
   
