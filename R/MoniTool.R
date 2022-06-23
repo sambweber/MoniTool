@@ -79,7 +79,7 @@ MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, sites.toget
     print(data.frame(distinct(subset(data,too_few),season,beach)),row.names = F)
   }
   
-  nest.vars = c('season','reference_date')
+  nest.vars = c('season')
   if(!sites.together) nest.vars = c(nest.vars,'beach')
   
   # Prep final output
