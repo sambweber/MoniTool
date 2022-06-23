@@ -46,8 +46,8 @@ MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, sites.toget
   
   if(!has_name(data,'date')) stop('Data must contain a column called date')
   if(!is(data$date,'Date')){
-    data$date = try(as.Date(data$Date)) 
-    if(is(data$date,'try-error')) stop("column 'date' should of class Date or in standard unambiguous format")
+    data$date = try(as.Date(data$date)) 
+    if(is(data$date,'try-error')) stop("column 'date' should of class Date or coercible to a Date using as.Date")
    }
   
   data %<>% mutate(reference_date = set_ref_date(date,reference.date), 
