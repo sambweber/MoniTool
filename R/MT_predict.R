@@ -152,11 +152,15 @@ if(has_name(mean.line,'beach')) pl + facet_wrap(~beach) else pl
 # season_merge: Helper function to combine predictions for all sites within seasons for summarizing
 # ----------------------------------------------------------------------------------------------------------
   
-season_merge = function(obj){
+merge_seasons = function(obj){
   
-  dplyr::select(obj,any_of(c('season','reference_date','beach','predict'))) %>%
-  unnest(predict) %>% 
-  nest(predict = -(any_of(c('season','reference_date'))))
+  if(!all(has_name(obj,c('season','beach')))) stop("obj should be of class MT_tbl with a 'season' and 'beach' column")
+  
+  condense = function(.x) list(setNames(.x,obj$beach) %>% bind_rows(.id = 'beach'))
+  group_by(obj,season) %>% 
+  summarise(across(any_of(c('data','summary','predict')),condense),
+            across(any_of('fit'),list)) %>% 
+  dplyr::select(any_of(names(data)))
    
 }
 
