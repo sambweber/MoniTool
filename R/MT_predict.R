@@ -102,16 +102,17 @@ plot.MTpred <- function(obj,by_site=T){
  
 orig = na.omit(distinct(dplyr::select(obj,y.var,any_of('beach'),day,N.obs)))
 cat('Calculating mean and CI')
-mean.line = MT_meanCI(obj,by_site=T)
+mean.line = MT_meanCI(obj,by_site=by_site)
 
 pl = 
   ggplot(mean.line,aes(x = day,y = mu)) + 
   geom_ribbon(aes(ymin = .lower,ymax = .upper,group = y.var),alpha=.3) +
   geom_line(aes(colour=y.var)) + 
-  geom_point(data=orig,aes(y = N.obs,colour=y.var),shape=21) +
   scale_colour_manual(values = c(nests='orange',activities='blue')) + 
   ylab('Count')
 
+if(by_site) pl = pl + geom_point(data=orig,aes(y = N.obs,colour=y.var),shape=21)
+  
 if(has_name(mean.line,'beach')) pl + facet_wrap(~beach) else pl
 
 }
