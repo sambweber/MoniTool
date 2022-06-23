@@ -93,6 +93,36 @@ MT_append_observed = function(preds,data){
 
 }
   
+  
+# ---------------------------------------------------------------------------------------------------------------------------------------
+# summary.MTfit: summary method for MTfit 
+# --------------------------------------------------------------------------------------------------------------------------------------- 
+
+#' @param model A model fit using MT_fit  
+  
+#' @returns A tibble containing the mean, median, sd, credible intervals, potential scale reduction factor and effective sample size for
+#' parameters.
+  
+  summary.MTfit = function(model){
+  
+
+  .s = suppressWarnings(spread_draws(model,alpha[Y,beach],
+               phi[Y,beach],
+               s1[Y,beach],
+               s2[Y,beach],
+               tf[Y,beach],
+               tp[Y,beach])) %>%
+  summarise_draws() %>%
+  dplyr::select(-mad,-ess_tail) %>%
+  rename(n_eff = ess_bulk)
+  
+  if(all(is.na(.s$beach))) .s$beach <- NULL
+  
+  .s$Y <- attr(model,'y.names')[.s$Y]
+  rename(.s,y.var=Y)
+  
+}
+  
 # ----------------------------------------------------------------------------------------------------------
 # season_merge: Helper function to combine predictions for all sites within seasons for summarizing
 # ----------------------------------------------------------------------------------------------------------
