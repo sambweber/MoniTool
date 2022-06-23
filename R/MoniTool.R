@@ -79,14 +79,16 @@ MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, sites.toget
     print(data.frame(distinct(subset(data,too_few),season,beach)),row.names = F)
   }
   
-  nest.vars = c('season')
+  nest.vars = c('season','reference_date')
   if(!sites.together) nest.vars = c(nest.vars,'beach')
   
   # Prep final output
   data %<>% subset(!too_few) %>%
     droplevels() %>%
     dplyr::select(any_of(c('season','beach','day','datestart','date','window')),everything(),-too_few) %>%
-    nest(data = -any_of(nest.vars)) 
+    nest(data = -any_of(nest.vars)) %>%
+    mutate(data = map2(data,reference_date, ~set_attr(.x,'ref_date',.y))) %>%
+    dplyr::select(-reference_date)
   
   class(data) <- c('MT_df',class(data))
   
