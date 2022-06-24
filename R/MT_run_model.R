@@ -57,9 +57,10 @@ MT_NimModel <- nimbleCode({
       s1[r,b] ~ dexp(s_rate[r,b])
       s2[r,b] ~ dexp(s_rate[r,b])
       
-      stp[r,b] ~ dunif(0, 10)
-      tp_ast[r,b] ~ dnorm(0, sd = 1)
-      tp[r,b] <- Pk + tp_ast[r,b] * stp[r,b]
+      #stp[r,b] ~ dunif(0, 10)
+      #tp_ast[r,b] ~ dnorm(0, sd = 1)
+      #tp[r,b] <- Pk + tp_ast[r,b] * stp[r,b]
+      tp[r,b] <- dunif(140,220)
     }
     
   }  
@@ -167,9 +168,10 @@ MT_initialize <- function(model, smin = 0.01, smax = 10, attempts = 100) {
     s_rate <- matrix(runif(R*B, smin, smax),nrow=R)
     s2 <- s1 <- matrix(rexp(R*B,s_rate),nrow=R)
     
-    tp_ast <- matrix(rnorm(B*R, 0, 1),nrow=R)
-    stp <- matrix(runif(B*R, 0, 10),nrow=R)
-    tp <- Pk + tp_ast * stp
+    #tp_ast <- matrix(rnorm(B*R, 0, 1),nrow=R)
+    #stp <- matrix(runif(B*R, 0, 10),nrow=R)
+    #tp <- Pk + tp_ast * stp
+    tp <- matrix(runif(B*R, 140, 220),nrow=R)
     
     tf <- matrix(rexp(B*R,0.2),nrow=R)
     
