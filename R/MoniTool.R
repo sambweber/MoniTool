@@ -45,9 +45,10 @@ require(lubridate)
 MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, sites.together = F){
   
   if(!has_name(data,'date')) stop('Data must contain a column called date')
+  data = drop_na(data,date)
   if(!is(data$date,'Date')){
-    data$date = try(as.Date(data$date)) 
-    if(is(data$date,'try-error')) stop("column 'date' should of class Date or coercible to a Date using as.Date")
+    data$date = suppressWarnings(parse_date_time(data$date,orders=c("%Y-%m-%d","%d/%m%/Y")))
+    if(any_na(data$date)) stop("column 'date' is not of class 'Date' and format cannot be guessed")
    }
   
   data %<>% mutate(reference_date = set_ref_date(date,reference.date), 
