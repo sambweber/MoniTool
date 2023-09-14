@@ -274,6 +274,9 @@ return(fit)
 # MT_fit: Function for running a nimble model across multiple sites/seasons in a nested dataste produced by MT_prep
 # ----------------------------------------------------------------------------------------------------------------
 
+# This function currently requires that you specify a peak for initialising the model. It would be better it it just self
+# initialised. We could just use highest value in data or from another model e.g. GAM or maximum likelihood fit of this model.
+                 
 MT_fit <- function(data, Pk, nchains=2, niter=40000, nburnin = 10000, thin = 1,
                      params = c("alpha", "s1", "s2", "tf", "tp", "phi"),
                      init.attempts = 100,init.control = list(smin = 0.01,smax=10),ncores=1){
