@@ -95,7 +95,8 @@ simulate_season = function(phenology,days,N,theta){
   t  = length(days)
             
   if(is(phenology,'MTfit')){
-    p = predict(phenology,samples=1,days = days)$mu
+    pred = predict(phenology,samples=1,days = days)
+    p = pred$mu
     theta = MT_sample(phenology,1)$phi     # Sample theta from the posterior - I think phi is theta in this case, or the size parameter in dsNbinom
   } else if (is(phenology,'numeric') & length(phenology) == t){
     p = phenology
@@ -106,9 +107,10 @@ mu = N*p
 Y = table(factor(sample(t, N, replace=TRUE,prob=p*w), levels=1:t)) 
 Y = as.numeric(Y)
 
-if(is.data.frame(proportions)){
-  proportions$mu = mu; proportions$Y = Y
-  return(proportions)
+if(is(phenology,'MTfit')){
+  pred$sim = Y
+  class(pred) <- c('MTsim',class(pred))
+  return(pred)
 } else {return(Y)}
 
 }
