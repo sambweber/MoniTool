@@ -47,7 +47,7 @@ MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, sites.toget
   if(!has_name(data,'date')) stop('Data must contain a column called date')
   data = drop_na(data,date)
   if(!is(data$date,'Date')){
-    data$date = suppressWarnings(parse_date_time(data$date,orders=c("%Y-%m-%d","%d/%m%/Y")))
+    data$date = suppressWarnings(as.Date(parse_date_time(data$date,orders=c("Ymd","dmY"))))
     if(any_na(data$date)) stop("column 'date' is not of class 'Date' and format cannot be guessed")
    }
   
