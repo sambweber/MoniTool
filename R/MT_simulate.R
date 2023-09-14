@@ -96,6 +96,7 @@ simulate_season = function(phenology,days,N,theta){
             
   if(is(phenology,'MTfit')){
     p = predict(phenology,samples=1,days = days)$mu
+    theta = MT_sample(phenology,1)$phi     # Sample theta from the posterior - I think phi is theta in this case, or the size parameter in dsNbinom
   } else if (is(phenology,'numeric') & length(phenology) == t){
     p = phenology
   } else stop("'phenology' should be a numeric vector of weights the same length as 'days' or an 'MTpred' object")
