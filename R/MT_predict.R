@@ -11,7 +11,7 @@ require(tidybayes)
 MT_sample = function(model,data,n = 2000){
 model %<>% recover_types(data)
 samples = spread_draws(model,alpha[Y,beach],s1[Y,beach],s2[Y,beach]
-                       ,tf[Y,beach],tp[Y,beach],phi[Y,beach],ndraws=2000,sep=', ') %>%
+                       ,tf[Y,beach],tp[Y,beach],phi[Y,beach],ndraws=n,sep=', ') %>%
           mutate(.draw = 1:n) %>% # renumber draws sequentially from one to facilitate integration of sites later
           ungroup()
 samples$Y <- attr(model,'y.names')[samples$Y]
