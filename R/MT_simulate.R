@@ -94,7 +94,7 @@ simulate_season = function(phenology,days,N,theta){
   
   t  = length(days)
             
-  if(is(phenology,'MTpred')){
+  if(is(phenology,'MTfit')){
     p = predict(phenology,samples=1,days = days)$mu
   } else if (is(phenology,'numeric') & length(phenology) == t){
     p = phenology
