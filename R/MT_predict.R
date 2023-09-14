@@ -8,7 +8,9 @@ require(tidybayes)
 # spread draws "[, ]" doesn't work. Dissection of the source code
 # has shown this to be the case and that replacing with sep = ', ' fixes it.
 
-MT_sample = function(model,data,n = 2000){
+MT_sample = function(model,n = 2000){
+
+data = attr(model,'data')
 model %<>% recover_types(data)
 samples = spread_draws(model,alpha[Y,beach],s1[Y,beach],s2[Y,beach]
                        ,tf[Y,beach],tp[Y,beach],phi[Y,beach],ndraws=n,sep=', ') %>%
@@ -29,9 +31,11 @@ rename(samples,y.var=Y)
 # if meanFnNim has a different number of arguments e.g. a different functional form as 
 # we expand the code later
 
-predict.MTfit = function(model,data,days,samples = 2000){
+predict.MTfit = function(model,days,samples = 2000){
+
+  data = attr(model,'data')
   
-  samples = MT_sample(model,data,samples)
+  samples = MT_sample(model,samples)
   
   args = formalArgs(meanFnNim) %>% subset(.!='t')
   arg.pos = match(args,names(samples))
@@ -64,7 +68,7 @@ MT_predict <- function(object,days,samples = 2000){
     days = min(days):max(days)
    }
   
-  mutate(object,predict = map2(fit,data,predict.MTfit,days=days,samples=samples))
+  mutate(object,predict = map(fit,predict.MTfit,days=days,samples=samples))
   
   }
   
