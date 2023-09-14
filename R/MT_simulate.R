@@ -91,22 +91,22 @@ simulate_trend = function(init.size, length, model = c('exp.decline'), theta, al
 # Days is a numeric vector giving the length of the simulated series, N is the total number of counts that occurred across 'days' and theta is the dispersion parameter of the negative binomial generating counts.
 
 simulate_season = function(phenology,days,N,theta){
+
+  stop("'phenology' should be a numeric vector of weights for each day in 'days' or an 'MTpred' object")
   
   if(is(phenology,'MTpred')){
-      predict(phenology,samples=1,days = days)$mu
-      stop("'phenology' should be a numeric vector of weights for each day in 'days' or an 'MTpred' object")
-    }
+    predict(phenology,samples=1,days = days)$mu
   } else {p = phenology}
-  
-  t  = length(days)
-  w  = rgamma(t,shape=theta,scale=1/theta)
-  mu = N*p
-  Y = table(factor(sample(t, N, replace=TRUE,prob=p*w), levels=1:t)) 
-  Y = as.numeric(Y)
 
-  if(is.data.frame(proportions)){
-    proportions$mu = mu; proportions$Y = Y
-    return(proportions)
-  } else {return(Y)}
-  
-  }
+t  = length(days)
+w  = rgamma(t,shape=theta,scale=1/theta)
+mu = N*p
+Y = table(factor(sample(t, N, replace=TRUE,prob=p*w), levels=1:t)) 
+Y = as.numeric(Y)
+
+if(is.data.frame(proportions)){
+  proportions$mu = mu; proportions$Y = Y
+  return(proportions)
+} else {return(Y)}
+
+}
