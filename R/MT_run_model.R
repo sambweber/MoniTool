@@ -299,5 +299,8 @@ data = mutate(data,fit = purrr::map(data,MT_run_model,Pk = Pk,nchains=nchains,ni
                      parameters.to.monitor = params,init.attempts = init.attempts,init.control = init.control)) 
   
   }
+
+return(data)
+  
 }  
   
