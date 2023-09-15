@@ -79,6 +79,6 @@ MT_protocol.numeric = function(x, bolus, staccato, peak,
   
 }
 
-MT_protocol.MTsim = function(MTsim,...){ MT_protocol(MTsim$day) } 
+MT_protocol.MTsim = function(MTsim,...){ MT_protocol(MTsim$day, ...) } 
 
 
