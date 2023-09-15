@@ -90,14 +90,18 @@ simulate_trend = function(init.size, length, model = c('exp.decline'), theta, al
 # Simulate counts across nesting season. Where phenology is either an MTfit model object fit by monitool, or a numeric vector of length days giving the relative amount of activity on each day.
 # Days is a numeric vector giving the length of the simulated series, N is the total number of counts that occurred across 'days' and theta is the dispersion parameter of the negative binomial generating counts.
 
+# Question over what phenology curve to simulate from if both nests and activities in MTfit object and have different curves. Default at the moment is just to use first (or only) which always be activities if both
+# modelled together - but could make so that it returns esimtates for any present and they could be subset later. All that is being borrowed at the moment is the shape of the curve and the theta value.
+
 simulate_season = function(phenology,days,N,theta){
   
   t  = length(days)
             
   if(is(phenology,'MTfit')){
     pred = predict(phenology,samples=1,days = days)
+    pred = pred[y.var = attr(pred,'y.names')[1]]  #Only select first y.var if several in same model
     p = pred$mu
-    theta = MT_sample(phenology,1)$phi     # Sample theta from the posterior - I think phi is theta in this case, or the size parameter in dsNbinom
+    theta = MT_sample(phenology,1)$phi[1]     # Sample theta from the posterior (phi is theta in this case) - only for first y.var if several present at moment
   } else if (is(phenology,'numeric') & length(phenology) == t){
     p = phenology
   } else stop("'phenology' should be a numeric vector of weights the same length as 'days' or an 'MTpred' object")
