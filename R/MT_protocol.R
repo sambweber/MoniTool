@@ -6,7 +6,6 @@
 
 bolus = function(x,start,duration){
   if(length(x)==1) x = 1:x
-  x = 1:length(x)
   x %in% unlist(map(start,~x[.x:(.x+duration)]))
 }
 
@@ -17,7 +16,7 @@ peak = function(x,peak,duration){
 
 staccato = function(x,frequency,duration){
   if(length(x)==1) x = 1:x
-  x = 1:length(x)
+  x = x+1-min(x)
   x%%frequency %in% 1:duration 
 }
 
@@ -32,7 +31,9 @@ staccato = function(x,frequency,duration){
 # applied within blocks. Otherwise, staccato will be applied to full set and any blocks
 # included will be sampled daily.
 
-sample_design = function(x, bolus, staccato, peak, 
+MT_protocol = function(x,...) UseMethod('MT_protocol')
+
+MT_protocol.numeric = function(x, bolus, staccato, peak, 
                          staccato.in.block = TRUE, .fun = TRUE){
   
   y = rep(TRUE,length(x))
@@ -77,3 +78,7 @@ sample_design = function(x, bolus, staccato, peak,
   }
   
 }
+
+MT_protocol.MTsim = function(MTsim,...){ MT_protocol(MTsim$day) } 
+
+
