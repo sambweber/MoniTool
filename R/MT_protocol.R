@@ -78,6 +78,13 @@ MT_protocol.numeric = function(x, bolus, staccato, peak,
   
 }
 
-MT_protocol.MTsim = function(MTsim,...){ MT_protocol(MTsim$day, ...) } 
+# Behaviour for MTsim is if the function doesn't return a subsetting function, add a column called 'include' indicating
+# whether each observation is retained.
+
+MT_protocol.MTsim = function(MTsim,...){ 
+  x = MT_protocol(MTsim$day, ...) 
+  if(!inherits(x,'protocol.fun')) MTsim$include = x
+  return(x)
+} 
 
 
