@@ -73,7 +73,6 @@ MT_protocol.numeric = function(x, bolus, staccato, peak,
    class(f) <- c('protocol.fun',class(f))
    return(f)
   } else {
-   class(y) <- c('protocol',class(y))
    return(y)
   }
   
