@@ -150,12 +150,13 @@ simulate_phenology.MTfit = function(phenology,days,N){
     Y = sim.basic(p,days,N,theta)
     pred$sim = Y
     class(pred) <- c('MTsim',class(pred))
+    return(pred)
 }
 
 simulate_phenology.MT_df = function(phenology,days,N, n.sims){
   
-  if(!has_name(MT_df,'fit')) stop ('Error')
-  models = MT_df$fit[sample(1:nrow(MT_df),n.sims,replace=T)]
+  if(!has_name(phenology,'fit')) stop ('Error')
+  models = phenology$fit[sample(1:nrow(phenology),n.sims,replace=T)]
   lapply(models,simulate_phenology,days = days, N = N)
 }
 
