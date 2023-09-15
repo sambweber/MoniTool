@@ -109,8 +109,8 @@ MT_make_model <- function(data, response = c('activities','nests'), Pk){
   consts$bch <- if(has_name(data,'beach')) as.numeric(data$beach) else rep(1,consts$N)
   consts$B = max(consts$bch)
   
-  # Remove any columns that are all NAs prior to fitting
-  Y = as.matrix(data[,response])
+  # Remove any response columns that are all NAs prior to fitting
+  Y = as.matrix(dplyr::select(data,any_of(c('activities','nests'))))
   Y = Y[, colSums(is.na(Y)) < nrow(Y), drop=F]
   
   consts$R = ncol(Y)
