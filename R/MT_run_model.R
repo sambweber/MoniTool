@@ -223,7 +223,7 @@ MT_initialize <- function(model, smin = 0.01, smax = 10, attempts = 100) {
 # MT_run_model: Function for compiling and running the nimble model
 # ----------------------------------------------------------------------------------------------------------------
                  
-init.control = function() list(smin = 0.01,smax=10)
+#init.control = function() list(smin = 0.01,smax=10)
 
 # ----------------------------------------------------------------------------------------------------------------
 # MT_run_model: Function for compiling and running the nimble model
@@ -244,7 +244,6 @@ MT_run_model = function(data, Pk, nchains=2, niter=40000, nburnin = 10000, thin 
                      init.attempts = 100,init.control = list(smin = 0.01,smax=10)) {
 
 
-init.control
 assign('dSnbinomNim', dSnbinomNim, envir = .GlobalEnv)
 assign('rSnbinomNim', rSnbinomNim, envir = .GlobalEnv)  
   
@@ -252,7 +251,7 @@ cat('#Compiling model')
 model = MT_make_model(data,Pk=Pk)
 
 cat('#Initialising model')
-init.control = modifyList(init.control(),init.control)
+#init.control = modifyList(init.control(),init.control)   # This line currently prevents MT_run_model in parallel - function init.control() can't be found)
 inits <- map(1:nchains, ~MT_initialize(model,attempts = init.attempts, smin = init.control$smin,smax=init.control$smax))
 
 cat('#Configuring model')
