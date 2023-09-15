@@ -128,41 +128,46 @@ if(is(phenology,'MTfit')){
 
 simulate_phenology = function(x,...) UseMethod('simulate_phenology')
 
-sim.basic = function(p,days,N,theta){
-   t  = length(days)
-   w  = rgamma(t,shape=theta,scale=1/theta)
-   mu = N*p
-   Y = table(factor(sample(t, N, replace=TRUE,prob=p*w), levels=1:t)) 
-   as.numeric(Y)
-  }
-
-simulate_phenology.numeric = function(phenology,...){
-   stopifnot('phenology and days should be of same length' = length(phenology) != length(days))
-   sim.basic(p=phenology,...)
+simulate_phenology.numeric = function(phenology,total,theta){
+  t  = length(phenology)
+  w  = rgamma(t,shape=theta,scale=1/theta)
+  Y = table(factor(sample(t, total, replace=TRUE,prob=phenology*w), levels=1:t)) 
+  as.numeric(Y)
 }
 
-simulate_phenology.MTfit = function(phenology,days,N){
-    pred = predict(phenology,samples=1,days = days)
-    pred = subset(pred,y.var == attr(phenology,'y.names')[1]) #Only select first y.var if several in same model
-    p = pred$mu
-    theta = MT_sample(phenology,1)$phi[1]
+simulate_phenology.MTfit = function(phenology,days,total,n.sims){
 
-    Y = sim.basic(p,days,N,theta)
-    pred$sim = Y
-    pred$mu = pred$mu/sum(pred$mu)*N
+    y = attr(phenology,'y.names')[1]   #Only select first y.var if several in same model
+  
+    pred = predict(phenology,samples=n.sims,days = days) %>% 
+           rename(.sim = .draw) %>%
+           subset(y.var == y) 
+    pred = split(pred,pred$.sim)
+    
+    # At the moment theta and mean predictions come from different posterior draws - this could be improved.
+    theta = MT_sample(phenology,1) %>%
+            subset(y.var == y) %$% phi
+
+    pred%<>%
+    map2(theta,~mutate(.x,mu = mu/sum(mu)*total,
+                       sim = simulate_phenology(mu,total,.y))) %>%
+    bind_rows() 
+    
     class(pred) <- c('MTsim',class(pred))
     return(pred)
 }
 
-simulate_phenology.MT_df = function(phenology,days,N, n.sims){
+simulate_phenology.MT_df = function(phenology,days,total,n.sims){
   
   if(!has_name(phenology,'fit')) stop ('Error')
   models = phenology$fit[sample(1:nrow(phenology),n.sims,replace=T)]
-  lapply(models,simulate_phenology,days = days, N = N)
+  lapply(models,simulate_phenology,days = days, total = total, n.sims=1) %>%
+  bind_rows(.id = '.sim')
+  
 }
 
-
-
-
+plot.MTsim = function(x){
+ggplot(a,aes(x = day)) + geom_point(aes(y=sim)) + geom_line(aes(y=mu), colour = 'blue') + facet_wrap(~.sim)
+}
 
 
