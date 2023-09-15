@@ -149,6 +149,7 @@ simulate_phenology.MTfit = function(phenology,days,N){
 
     Y = sim.basic(p,days,N,theta)
     pred$sim = Y
+    pred$mu = pred$mu/sum(pred$mu)*N
     class(pred) <- c('MTsim',class(pred))
     return(pred)
 }
