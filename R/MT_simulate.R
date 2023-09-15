@@ -145,7 +145,7 @@ simulate_phenology.MTfit = function(phenology,days,total,n.sims){
     pred = split(pred,pred$.sim)
     
     # At the moment theta and mean predictions come from different posterior draws - this could be improved.
-    theta = MT_sample(phenology,1) %>%
+    theta = MT_sample(phenology,n.sims) %>%
             subset(y.var == y) %$% phi
 
     pred%<>%
