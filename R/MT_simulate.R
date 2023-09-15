@@ -183,3 +183,28 @@ return(p)
 }
 
 
+# -------------------------------------------------------------------------------------------------------------
+# MT_sim2f: Conversion of an MTsim simulation to an MT_df so it can be used to fit models and evaluate outcome
+# --------------------------------------------------------------------------------------------------------------
+
+MT_sim2df = function(MTsim){
+
+x = dplyr::select(MTsim,.sim,day,y.var,sim) %>% 
+spread('y.var','sim') %>%
+mutate(window = 1) %>%
+nest(data = -.sim)
+
+class(x) <- c('MT_df',class(x)[!class(x) %in% c('MTsim','MTpred')])
+
+return(x)
+}
+
+# -------------------------------------------------------------------------------------------------------------
+# MAPE: Mean average percentage error
+# --------------------------------------------------------------------------------------------------------------
+
+MAPE = function(expected,observed){
+  mean(abs((expected - observed)/expected))*100
+}
+
+
