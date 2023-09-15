@@ -99,7 +99,7 @@ simulate_season = function(phenology,days,N,theta){
             
   if(is(phenology,'MTfit')){
     pred = predict(phenology,samples=1,days = days)
-    pred = pred[y.var = attr(pred,'y.names')[1]]  #Only select first y.var if several in same model
+    pred = pred[y.var = attr(phenology,'y.names')[1],]  #Only select first y.var if several in same model
     p = pred$mu
     theta = MT_sample(phenology,1)$phi[1]     # Sample theta from the posterior (phi is theta in this case) - only for first y.var if several present at moment
   } else if (is(phenology,'numeric') & length(phenology) == t){
