@@ -118,3 +118,49 @@ if(is(phenology,'MTfit')){
 } else {return(Y)}
 
 }
+
+
+# --------------------------------------------------------------------------------------
+# simulate_phenology
+# --------------------------------------------------------------------------------------
+
+# An improvement with methods for different kinds of objects
+
+simulate_phenology = function(x,...) UseMethod('simulate_phenology')
+
+sim.basic = function(p,days,N,theta){
+   t  = length(days)
+   w  = rgamma(t,shape=theta,scale=1/theta)
+   mu = N*p
+   Y = table(factor(sample(t, N, replace=TRUE,prob=p*w), levels=1:t)) 
+   as.numeric(Y)
+  }
+
+simulate_phenology.numeric = function(phenology,...){
+   stopifnot('phenology and days should be of same length' = length(phenology) != length(days))
+   sim.basic(p=phenology,...)
+}
+
+simulate_phenology.MTfit = function(phenology,days,N){
+    pred = predict(phenology,samples=1,days = days)
+    pred = subset(pred,y.var == attr(phenology,'y.names')[1]) #Only select first y.var if several in same model
+    p = pred$mu
+    theta = MT_sample(phenology,1)$phi[1]
+
+    Y = sim.basic(p,days,N,theta)
+    pred$sim = Y
+    class(pred) <- c('MTsim',class(pred))
+}
+
+simulate_phenology.MT_df = function(phenology,days,N, n.sims){
+  
+  if(!has_name(MT_df,'fit')) stop ('Error')
+  models = MT_df$fit[sample(1:nrow(MT_df),n.sims,replace=T)]
+  lapply(models,simulate_phenology,days = days, N = N)
+}
+
+
+
+
+
+
