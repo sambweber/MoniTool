@@ -282,7 +282,8 @@ return(fit)
 MT_fit <- function(data, Pk, nchains=2, niter=40000, nburnin = 10000, thin = 1,
                      params = c("alpha", "s1", "s2", "tf", "tp", "phi"),
                      init.attempts = 100,init.control = list(smin = 0.01,smax=10),ncores=1){
- 
+
+if(is(data,'MTsim')) data <- MT_sim2df(data)  
 if(!is(data,'MT_df')) stop('data should be a MT_df object created by MT_prep')
   
 if(ncores>1){
