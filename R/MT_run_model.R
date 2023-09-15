@@ -243,6 +243,8 @@ MT_run_model = function(data, Pk, nchains=2, niter=40000, nburnin = 10000, thin 
                      parameters.to.monitor = c("alpha", "s1", "s2", "tf", "tp", "phi"),
                      init.attempts = 100,init.control = list(smin = 0.01,smax=10)) {
 
+
+init.control
 assign('dSnbinomNim', dSnbinomNim, envir = .GlobalEnv)
 assign('rSnbinomNim', rSnbinomNim, envir = .GlobalEnv)  
   
