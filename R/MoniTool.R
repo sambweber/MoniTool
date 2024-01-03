@@ -63,6 +63,10 @@ MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, sites.toget
       mutate(season = factor(paste(unique(c(year(reference_date),season)),collapse='-')))    
     
   }
+
+  data %<>% 
+  group_by(across(any_of(c('season','beach')))) %>%
+  arrange(date)
   
   if(!has_name(data,'datestart')) {
     
