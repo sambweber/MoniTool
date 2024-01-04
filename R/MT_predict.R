@@ -29,7 +29,7 @@ rename(samples,y.var=Y)
 
 # This currently matches column positions to argument names in meanFnNimm, but it won't work 
 # if meanFnNim has a different number of arguments e.g. a different functional form as 
-# we expand the code later
+# we expand the code later.... we could this do this by collapsing the args to a list in a do.call maybe
 
 predict.MTfit = function(model,days,samples = 2000){
 
@@ -120,8 +120,7 @@ if(by_site) pl = pl + geom_point(data=orig,aes(y = N.obs,colour=y.var),shape=21)
 if(has_name(mean.line,'beach')) pl + facet_wrap(~beach) else pl
 
 }
-  
-  
+    
   
 # ---------------------------------------------------------------------------------------------------------------------------------------
 # summary.MTfit: summary method for MTfit 
@@ -185,7 +184,25 @@ MT_meanCI = function(preds,by_site=T,interval = 0.95,what = c('counts','proporti
   ungroup()
   
 }
+
+# ----------------------------------------------------------------------------------------------------------
+# MT_seasonCI: Calculates the start, end and duration of a season based on a given percentage of nesting
+# ----------------------------------------------------------------------------------------------------------
+
+MT_season = function(predictions,by_site=T,quantile = c(0.025,0.975),interval=0.95,full.posterior=F){
   
+  group_by(predictions,y.var,.draw) %>%
+  {if(by_site & has_name(predictions,'beach')) group_by(.,beach,.add=T) else .} %>%
+  mutate(s = cumsum(mu)/sum(mu)) %>% 
+  summarise(start = first(day[s>=quantile[1]]),end = first(day[s>=quantile[2]])) %>% 
+  {if(!full.posterior){
+  ungroup(.,.draw) %>% mean_qi(start,end,.width = interval) %>% 
+  dplyr::select(-(.width:.interval))
+  } else .} %>%
+  ungroup()
+  
+}
+
 # ----------------------------------------------------------------------------------------------------------
 # MT_totalCI: Calculates the total number of activities per site or overall along with associated credible intervals
 # ----------------------------------------------------------------------------------------------------------
@@ -208,7 +225,7 @@ MT_totalCI = function(predictions,by_site=T,interval=0.95,full.posterior=F){
 
   
 # ----------------------------------------------------------------------------------------------------------
-# MT_totalCI: Calculates proportions on beaches within seasons
+# MT_propCI: Calculates proportions on beaches within seasons
 # ----------------------------------------------------------------------------------------------------------
  
 # We could optionally here allow use of the totals including observations (Y) or only predicted values (y.pred) to
