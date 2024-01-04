@@ -132,8 +132,7 @@ if(has_name(mean.line,'beach')) pl + facet_wrap(~beach) else pl
 #' parameters.
   
   summary.MTfit = function(model){
-  
-
+    
   .s = suppressWarnings(spread_draws(model,alpha[Y,beach],
                phi[Y,beach],
                s1[Y,beach],
@@ -202,6 +201,24 @@ MT_season = function(predictions,by_site=T,quantile = c(0.025,0.975),interval=0.
   ungroup()
   
 }
+
+# This version works directly from fitted model and adds the peak too - not currently from the same draws as the
+# start and end though which requires improving
+  
+MT_seasonality = function(model,samples,quantile = c(0.025,0.975),interval=0.95,full.posterior=F){
+  
+  predict(model,days=1:365,samples=samples) %>% 
+  MT_season(quantile=quantile,full.posterior=TRUE) %>%
+  left_join(MT_sample(model,n=samples)) %>%
+  dplyr::select(y.var:duration,peak=tp) %>%
+  {if(!full.posterior){
+  group_by(.,across(any_of(c('y.var','beach')))) %>% 
+  mean_qi(start,end,duration,peak,.width = interval) %>% 
+  dplyr::select(-(.width:.interval))
+  } else .} %>%
+  ungroup()
+  
+  }
 
 # ----------------------------------------------------------------------------------------------------------
 # MT_totalCI: Calculates the total number of activities per site or overall along with associated credible intervals
