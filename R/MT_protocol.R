@@ -6,12 +6,12 @@
 
 bolus = function(x,start,duration){
   if(length(x)==1) x = 1:x
-  x %in% unlist(map(start,~x[.x:(.x+duration)]))
+  x %in% unlist(map(start,~x[.x:(.x+duration-1)]))
 }
 
 # A special case of bolus to straddle peak date
 peak = function(x,peak,duration){
-  bolus(x,start=peak[1]-duration/2,duration) 
+  bolus(x,start=floor(peak[1]-(duration-1)/2),duration) 
 }
 
 staccato = function(x,frequency,duration){
