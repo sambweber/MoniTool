@@ -64,24 +64,34 @@ MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, sites.toget
     
   }
 
+  # Order observations by date and check if any duplicates
   data %<>% 
   group_by(across(any_of(c('season','beach')))) %>%
-  arrange(date)
-  
+  arrange(date) 
+
+  dups = subset(count(data,date),n>1,select=-n)
+  if(nrow(dups)){
+   stop(paste(c('Duplicate survey dates found', 
+             capture.output(print(data.frame(dups), row.names = FALSE))), 
+           collapse = "\n"))
+  }
+
+  # Calculate start of monitoring windows if not explicitly given
   if(!has_name(data,'datestart')) {
     
-    data %<>% group_by(across(any_of(c('season','beach')))) %>%
+    data %<>% 
       mutate(window = map_dbl(diff(c(-1,day)),~min(.x,max.days)), datestart = date-window)
     
   } else data %<>% mutate(window = date-datestart)
   
   # Remove beaches that have too few counts to be effectively modelled
-  data %<>% group_by(across(any_of(c('season','beach')))) %>%
+  data %<>% 
     mutate(too_few = n()<=min.obs) %>% ungroup()
   
-  if(sum(data$too_few)>1){
-    cat('The following seasons/beaches have insufficient data and have been removed:\n\n')
-    print(data.frame(distinct(subset(data,too_few),season,beach)),row.names = F)
+  if(any(data$too_few)){
+    warning(paste(c('The following seasons/beaches have insufficient data and have been removed:', 
+           capture.output(print(data.frame(distinct(subset(data,too_few),season,beach)), row.names = FALSE))), 
+           collapse = "\n"))
   }
   
   nest.vars = c('season','reference_date')
