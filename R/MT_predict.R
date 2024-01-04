@@ -41,6 +41,9 @@ predict.MTfit = function(model,days,samples = 2000){
   arg.pos = match(args,names(samples))
 
   if(missing(days)) days = min(data$day):max(data$day)
+
+  #https://stackoverflow.com/questions/58360085/r-call-function-with-data-frame-column-names-as-arguments
+  #This maybe a better way of implementing predictions if names match
   
   samples %<>%
   mutate(preds = pmap(.[arg.pos], ~map_dbl(days,function(t) meanFnNim(t,..1,..2,..3,..4,..5)))) %>%
