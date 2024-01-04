@@ -194,9 +194,9 @@ MT_season = function(predictions,by_site=T,quantile = c(0.025,0.975),interval=0.
   group_by(predictions,y.var,.draw) %>%
   {if(by_site & has_name(predictions,'beach')) group_by(.,beach,.add=T) else .} %>%
   mutate(s = cumsum(mu)/sum(mu)) %>% 
-  summarise(start = first(day[s>=quantile[1]]),end = first(day[s>=quantile[2]])) %>% 
+  summarise(start = first(day[s>=quantile[1]]),end = first(day[s>=quantile[2]]),duration=end-start) %>% 
   {if(!full.posterior){
-  ungroup(.,.draw) %>% mean_qi(start,end,.width = interval) %>% 
+  ungroup(.,.draw) %>% mean_qi(start,end,duration,.width = interval) %>% 
   dplyr::select(-(.width:.interval))
   } else .} %>%
   ungroup()
