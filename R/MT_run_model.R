@@ -60,7 +60,7 @@ MT_NimModel <- nimbleCode({
       #stp[r,b] ~ dunif(0, 10)
       #tp_ast[r,b] ~ dnorm(0, sd = 1)
       #tp[r,b] <- Pk + tp_ast[r,b] * stp[r,b]
-      tp[r,b] ~ dunif(140,220)
+      tp[r,b] ~ dunif(100,175)
     }
     
   }  
