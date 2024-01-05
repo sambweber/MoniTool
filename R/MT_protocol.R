@@ -3,6 +3,7 @@
 # ------------------------------------------------------------------------------------------------------
 
 # These functions assume that x is a sequence of days (or 1:x) if x is a single integer
+# We could add optionally here the ability to specify a mix of start and end.
 
 bolus = function(x,start,duration){
   if(length(x)==1) x = 1:x
@@ -31,6 +32,8 @@ staccato = function(x,frequency,duration){
 # applied within blocks. Overlapping blocks are treated as single contiguous blocks for staccato sampling
 # to preserve the periodicity.
 # If staccato.in.bolus = FALSE, staccato will be applied to the full set and any blocks included will be sampled daily.
+
+# We could add an option here when staccato.in.bolus = TRUE and peak is specified to centre the staccato on the peak.
 
 MT_protocol = function(x,...) UseMethod('MT_protocol')
 
