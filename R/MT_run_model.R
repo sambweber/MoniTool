@@ -171,7 +171,7 @@ MT_initialize <- function(model, smin = 0.01, smax = 10, attempts = 100) {
     #tp_ast <- matrix(rnorm(B*R, 0, 1),nrow=R)
     #stp <- matrix(runif(B*R, 0, 10),nrow=R)
     #tp <- Pk + tp_ast * stp
-    tp <- matrix(runif(B*R, 140, 220),nrow=R)
+    tp <- matrix(runif(B*R, 100, 175),nrow=R)
     
     tf <- matrix(rexp(B*R,0.2),nrow=R)
     
