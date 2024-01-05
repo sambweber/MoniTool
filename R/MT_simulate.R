@@ -189,6 +189,7 @@ return(p)
 
 MT_sim2df = function(MTsim){
 
+if(has_name(MTsim,.include)) MTsim <- subset(MTsim,.include)
 x = dplyr::select(MTsim,.sim,day,y.var,sim) %>% 
 spread('y.var','sim') %>%
 mutate(window = 1) %>%
