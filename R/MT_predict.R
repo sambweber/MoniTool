@@ -71,10 +71,22 @@ MT_predict <- function(object,days,samples = 2000,ncores){
     days = min(days):max(days)
    }
 
+
+  if(ncores>1){
   
-  mutate(object,predict = map(fit,predict.MTfit,days=days,samples=samples))
+    plan(tweak(multisession,workers = ncores))
+    object = mutate(object,predict = furrr::future_map(fit,predict.MTfit,days=days,samples=samples))
+    plan(sequential)
+  
+} else {
+  
+    object = mutate(object,predict = map(fit,predict.MTfit,days=days,samples=samples))
   
   }
+
+    return(object)
+  
+}
   
                                              
 # ----------------------------------------------------------------------------------
