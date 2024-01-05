@@ -85,7 +85,7 @@ MT_protocol.numeric = function(x, bolus, staccato, peak,
 MT_protocol.MTsim = function(MTsim,...){ 
   x = MT_protocol(MTsim$day, ...) 
   if(!inherits(x,'protocol.fun')) {
-    MTsim$include = x
+    MTsim$.include = x
     return(MTsim) } else {
   return(x)
  }   
