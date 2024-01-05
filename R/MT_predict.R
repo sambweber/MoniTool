@@ -62,7 +62,7 @@ predict.MTfit = function(model,days,samples = 2000){
 # MT_predict: Make predictions from an MT_tbl object
 # ----------------------------------------------------------------------------------
 
-MT_predict <- function(object,days,samples = 2000){
+MT_predict <- function(object,days,samples = 2000,ncores){
   
   if(!all(c('data','fit') %in% names(object))) stop ("object should be of class MT_tbl with columns 'data' and 'fit'")
   
@@ -70,6 +70,7 @@ MT_predict <- function(object,days,samples = 2000){
     days = bind_rows(object$data)$day
     days = min(days):max(days)
    }
+
   
   mutate(object,predict = map(fit,predict.MTfit,days=days,samples=samples))
   
