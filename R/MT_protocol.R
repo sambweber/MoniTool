@@ -27,9 +27,10 @@ staccato = function(x,frequency,duration){
 # A function to combine them elegantly - this can either return a subsetting function 
 # or a logical vector indicating whether each point should be retained or not. 
 # There are two ways of incorporating staccato sampling. If staccato.in.bolus = TRUE and
-# there are blocks included using wither bolus or peak then the staccato design will be
-# applied within blocks. Otherwise, staccato will be applied to full set and any blocks
-# included will be sampled daily.
+# there are blocks included using either bolus or peak then the staccato design will be
+# applied within blocks. Overlapping blocks are treated as single contiguous blocks for staccato sampling
+# to preserve the periodicity.
+# If staccato.in.bolus = FALSE, staccato will be applied to the full set and any blocks included will be sampled daily.
 
 MT_protocol = function(x,...) UseMethod('MT_protocol')
 
