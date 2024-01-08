@@ -149,9 +149,7 @@ simulate_phenology.MTfit = function(phenology,days,total,n.sims){
     theta = MT_sample(phenology,n.sims) %>%
             subset(y.var == y) %$% phi
 
-    pred%<>%
-    #map2(theta,~mutate(.x,mu = mu/sum(mu)*total,
-    #                   sim = simulate_phenology(mu,total,.y))) %>%
+    pred=
     pmap(list(pred,theta,total),~mutate(..1,mu = mu/sum(mu)*..3,
                        sim = simulate_phenology(mu,..3,..2))) %>%
     bind_rows() 
