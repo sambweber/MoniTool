@@ -137,7 +137,7 @@ simulate_phenology.numeric = function(phenology,total,theta){
 
 simulate_phenology.MTfit = function(phenology,days,total,n.sims){
 
-    stopifnot("'total' should be of length = 1 or n.sims" = length(total) %in% c(1,n.sims))
+    if(!length(total) %in% c(1,n.sims)) stop("'total' should be of length = 1 or n.sims")
     y = attr(phenology,'y.names')[1]   #Only select first y.var if several in same model
   
     pred = predict(phenology,samples=n.sims,days = days) %>% 
