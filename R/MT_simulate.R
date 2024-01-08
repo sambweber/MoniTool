@@ -137,6 +137,7 @@ simulate_phenology.numeric = function(phenology,total,theta){
 
 simulate_phenology.MTfit = function(phenology,days,total,n.sims){
 
+    stopifnot("'total' should be of length = 1 or n.sims" = length(total) %in% c(1,n.sims))
     y = attr(phenology,'y.names')[1]   #Only select first y.var if several in same model
   
     pred = predict(phenology,samples=n.sims,days = days) %>% 
@@ -149,8 +150,10 @@ simulate_phenology.MTfit = function(phenology,days,total,n.sims){
             subset(y.var == y) %$% phi
 
     pred%<>%
-    map2(theta,~mutate(.x,mu = mu/sum(mu)*total,
-                       sim = simulate_phenology(mu,total,.y))) %>%
+    #map2(theta,~mutate(.x,mu = mu/sum(mu)*total,
+    #                   sim = simulate_phenology(mu,total,.y))) %>%
+    pmap(list(pred,theta,total),~mutate(..1,mu = mu/sum(mu)*..3,
+                       sim = simulate_phenology(mu,..3,..2))) %>%
     bind_rows() 
     
     class(pred) <- c('MTsim',class(pred))
