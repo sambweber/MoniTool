@@ -155,6 +155,7 @@ simulate_phenology.MTfit = function(phenology,days,total,n.sims){
     bind_rows() 
     
     class(pred) <- c('MTsim',class(pred))
+    attr(pred,'.totals') <- total
     return(pred)
 }
 
@@ -163,8 +164,11 @@ simulate_phenology.MT_df = function(phenology,days,total,n.sims){
   if(!length(total) %in% c(1,n.sims)) stop("'total' should be of length = 1 or n.sims")
   if(!has_name(phenology,'fit')) stop ('Error')
   models = phenology$fit[sample(1:nrow(phenology),n.sims,replace=T)]
-  map2(models,total,~simulate_phenology(.x,days = days, total = .y, n.sims=1)) %>%
-  bind_rows(.id = '.sim')
+  sims = map2(models,total,~simulate_phenology(.x,days = days, total = .y, n.sims=1)) %>%
+  bind_rows(.id = '.sim') %>%
+  mutate(.sim = as.numeric(.sim))
+  attr(sims,'.totals')<-total
+  return(sims)
   
 }
 
