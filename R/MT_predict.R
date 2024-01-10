@@ -245,15 +245,19 @@ MT_seasonality = function(model,samples,quantile = c(0.025,0.975),interval=0.95,
 
 MT_totalCI = function(predictions,by_site=T,interval=0.95,full.posterior=F){
   
+  predictions = 
   group_by(predictions,y.var,.draw) %>%
   {if(by_site & has_name(predictions,'beach')) group_by(.,beach,.add=T) else .} %>%
-  summarise(N = sum(N),.groups = 'keep') %>% 
-  {if(!full.posterior){
-  ungroup(.,.draw) %>% mean_qi(N,.width = interval) %>% 
-  dplyr::select(-(.width:.interval))
-  } else .} %>%
-  ungroup()
+  summarise(N = sum(N),.groups = 'keep') 
+   
+  if(full.posterior) return(ungroup(predictions))
   
+   predictions = ungroup(predictions,.draw)
+   mean_qi(predictions,N,.width = interval) %>%
+   inner_join(summarise(predictions,log.sd = sd(log(N)))) %>%  
+   dplyr::select(-(.width:.interval)) %>%
+   ungroup()
+ 
 }
 
   
