@@ -51,6 +51,11 @@ acf.negbin <- function(N, mu, size, alpha, max.iter = 100, tol = 1e-5) {
 # Functions to model trends in mean where t is time and init.size is number
 # at t = 0. Other parameters control shape
 
+# this basically gives the linear decline too more elegantly and parameterised by %change (r)
+percent.change = function(init.size,r,t){
+  init.size*(1 + r)^t
+}
+
 exp.decline = function(init.size,s,t){
   init.size * exp(-((t) / s)^2)
 }
@@ -63,22 +68,25 @@ lin.decline = function(init.size,beta,t){
 # negative binomial dispersion parameter, alpha is an optional autocorrelation structure passed
 # to acf.negbin and parms is a list of additional parameters passed to model.
 
-simulate_trend = function(init.size, length, model = c('exp.decline'), theta, alpha, parms,
+simulate_trend = function(init.size, length, n.sims, model = c('exp.decline'), theta, alpha, parms,
                           ...){
-  
+  has.alpha = missing(alpha)
   parms$init.size = init.size
   parms$t = 0:length
   model = match.fun(model)
   mu = do.call(model,args = parms)
-  
-  if(missing(alpha)){
+
+  lapply(1:n.sims,function(x){  
+  if(has.alpha){
     y = rnbinom(length,size=theta,mu=mu)
   } else{
     y = acf.negbin(length,mu=mu,size=theta,alpha=alpha,...)
   }
   
   return(data.frame(t=parms$t,mu=mu,y=y))
-  
+  }) %>%
+  bind_rows(.id = '.sim')
+         
 }
 
 
