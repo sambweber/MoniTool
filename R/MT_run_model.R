@@ -102,16 +102,19 @@ MT_diff_matrix = function(t,w){
 #' point for model fits. Omeyer et al. 2022 found that using an approximate peak in priors resulted
 #' in better covnvergence.
 
-MT_make_model <- function(data, response = c('activities','nests'), Pk){
+MT_make_model <- function(data, response = c('activities','nests'), Pk, null=FALSE){
 
   tmat = MT_diff_matrix(data$day,data$window)
   consts = list(t=tmat,nt = rowSums(!is.na(tmat)), N = nrow(tmat),Pk = Pk)
   consts$bch <- if(has_name(data,'beach')) as.numeric(data$beach) else rep(1,consts$N)
   consts$B = max(consts$bch)
   
-  # Remove any response columns that are all NAs prior to fitting
+  # Remove any response columns that are all NAs prior to fitting - unless fitting null model
   Y = as.matrix(dplyr::select(data,any_of(c('activities','nests'))))
+  
+  if(!null){
   Y = Y[, colSums(is.na(Y)) < nrow(Y), drop=F]
+  } else Y[] <- NA
   
   consts$R = ncol(Y)
   consts$y.names = colnames(Y)
@@ -241,15 +244,16 @@ MT_initialize <- function(model, smin = 0.01, smax = 10, attempts = 100) {
 
 MT_run_model = function(data, Pk, nchains=2, niter=40000, nburnin = 10000, thin = 1,
                      parameters.to.monitor = c("alpha", "s1", "s2", "tf", "tp", "phi"),
-                     init.attempts = 100,init.control = list(smin = 0.01,smax=10)) {
+                     init.attempts = 100,init.control = list(smin = 0.01,smax=10),null=FALSE) {
 
 
 assign('dSnbinomNim', dSnbinomNim, envir = .GlobalEnv)
 assign('rSnbinomNim', rSnbinomNim, envir = .GlobalEnv)  
   
 cat('#Compiling model')
-model = MT_make_model(data,Pk=Pk)
-
+model = MT_make_model(data,Pk=Pk,null=null)
+if(null) data[TRUE,model$origData$y.names] <- NA
+  
 cat('#Initialising model')
 #init.control = modifyList(init.control(),init.control)   # This line currently prevents MT_run_model in parallel - function init.control() can't be found)
 inits <- map(1:nchains, ~MT_initialize(model,attempts = init.attempts, smin = init.control$smin,smax=init.control$smax))
