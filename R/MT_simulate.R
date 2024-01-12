@@ -132,7 +132,7 @@ if(is(phenology,'MTfit')){
 # simulate_phenology
 # --------------------------------------------------------------------------------------
 
-# An improvement with methods for different kinds of objects
+# An improvement with methods for different kinds of objects. 
 
 simulate_phenology = function(x,...) UseMethod('simulate_phenology')
 
@@ -143,14 +143,22 @@ simulate_phenology.numeric = function(phenology,total,theta){
   as.numeric(Y)
 }
 
-simulate_phenology.MTfit = function(phenology,days,total,n.sims){
+# The shift argument transposes the simulated phenology curve by a specified number of days 
+# to allow studies of climate change effects. 
+
+# This function currently draws the shape of the seasonal curve from the posterior of the MTfit object 
+# along with a theta value for simulation (they are not currently from the same draw due to the way 
+# predict.MTfit works, which could be improved for future iterations).
+
+simulate_phenology.MTfit = function(phenology,days,total,n.sims,shift=0){
 
     if(!length(total) %in% c(1,n.sims)) stop("'total' should be of length = 1 or n.sims")
     y = attr(phenology,'y.names')[1]   #Only select first y.var if several in same model
   
     pred = predict(phenology,samples=n.sims,days = days) %>% 
            rename(.sim = .draw) %>%
-           subset(y.var == y) 
+           subset(y.var == y) %>%
+           mutate(day = ((day+shift)%%365) %>% replace(.==0,365))
     pred = split(pred,pred$.sim)
     
     # At the moment theta and mean predictions come from different posterior draws - this could be improved.
