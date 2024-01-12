@@ -131,7 +131,7 @@ pl =
   scale_colour_manual(values = c(nests='orange',activities='blue')) + 
   ylab('Count')
 
-if(by_site) pl = pl + geom_point(data=orig,aes(y = N.obs,colour=y.var),shape=21)
+if(by_site & length(orig)) pl = pl + geom_point(data=orig,aes(y = N.obs,colour=y.var),shape=21)
   
 if(has_name(mean.line,'beach')) pl + facet_wrap(~beach) else pl
 
