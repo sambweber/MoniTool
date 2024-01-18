@@ -25,6 +25,38 @@ meanFnNim <- nimbleFunction(
   }
 )
 
+# The model from Girondot et al. 2010 Estimating density of animals during migratory
+# waves: a new model applied to marine turtles at nesting sites. We could also optimise
+# this model through nimble as the beginning/end parameters are more biologically meaningful
+
+phenology.model <- nimbleFunction(
+  run = function(t = double(0), E = double(0), B = double(0), Max = double(0),
+                 MinE = double(0), MinB = double(0),tf = double(0), tp = double(0)) {
+
+    pi = 3.141593
+    if(t < B){ mu <- MinB} else {
+      if(t < (tp - tf)) {
+        mu <- ((1+cos(pi*(tp - tf - t)/(tp - tf - B)))/2)*(Max - MinB)+MinB
+      } else {
+          if(t < (tp + tf)){
+            mu <- Max
+        } else {
+          if(t < E){
+            mu <- ((1+cos(pi*(t - (tp + tf))/(E - (tp + tf)))))/2*(Max - MinE)+MinE
+          } else {
+            mu <- MinE
+          }
+      }
+    }
+  }
+    return(mu)
+    returnType(double(0))
+  }
+)
+
+# tibble(t = 1:365) %>% 
+# mutate(N = map_dbl(t,~phenology.model(.x, MinE=10, MinB=2, B = 58, E = 200, tp = 110, tf = 8, Max = 400)))
+
 # -----------------------------------------------------------------------
 # MT_NimModel: Basic code for the NIMBLE model
 # -----------------------------------------------------------------------
