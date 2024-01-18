@@ -146,34 +146,37 @@ simulate_phenology.numeric = function(phenology,total,theta){
 # The shift argument transposes the simulated phenology curve by a specified number of days 
 # to allow studies of climate change effects. 
 
-# This function currently draws the shape of the seasonal curve from the posterior of the MTfit object 
-# along with a theta value for simulation (they are not currently from the same draw due to the way 
-# predict.MTfit works, which could be improved for future iterations).
+# This function draws the parameters describing the shape of the seasonal mean curve from the posterior of the MTfit object 
+# along with a theta value for simulation of observed counts around this mean. This is an improved version that takes
+# all parameter estimates (including theta) from the same posterior draw and preserves the parameter estimates in the 
+# returned object so they can be compared to those retrieved from fitting models to the simulations.
 
 simulate_phenology.MTfit = function(phenology,days,total,n.sims,shift=0){
 
-    if(!length(total) %in% c(1,n.sims)) stop("'total' should be of length = 1 or n.sims")
-    y = attr(phenology,'y.names')[1]   #Only select first y.var if several in same model
-  
-    pred = predict(phenology,samples=n.sims,days = days) %>% 
-           rename(.sim = .draw) %>%
-           subset(y.var == y) %>%
-           mutate(day = ((day+shift)%%365) %>% replace(.==0,365))
-    pred = split(pred,pred$.sim)
-    
-    # At the moment theta and mean predictions come from different posterior draws - this could be improved.
-    theta = MT_sample(phenology,n.sims) %>%
-            subset(y.var == y) %$% phi
+if(!length(total) %in% c(1,n.sims)) stop("'total' should be of length = 1 or n.sims")
 
-    pred=
-    pmap(list(pred,theta,total),~mutate(..1,mu = mu/sum(mu)*..3,
-                       sim = simulate_phenology(mu,..3,..2))) %>%
-    bind_rows() 
+  sims = 
+  MT_sample(phenology,n.sims) %>% 
+  subset(y.var == attr(phenology,'y.names')[1]) %>%
+  expand_grid(t = days) %>%
+  mutate(mu = pmap_dbl(list(!!!rlang::parse_exprs(formalArgs('meanFnNim'))), meanFnNim)) %>%
+  mutate(t = ((t+shift)%%365) %>% replace(.==0,365)) %>%
+  rename(.sim = .draw,day = t) %>% 
+  nest(data = c(day, mu)) %>%
+  mutate(total = total,.before = alpha) %>% 
+  mutate(data = pmap(list(data,total,phi),~mutate(..1,mu = mu/sum(mu)*..2,
+                                    N.sim = simulate_phenology(mu,..2,..3)))) %>%
+  dplyr::select(-.chain,-.iteration) 
+
+ class(sims) <- c('MTsim',class(sims))
     
-    class(pred) <- c('MTsim',class(pred))
-    attr(pred,'.totals') <- total
-    return(pred)
-}
+ return(sims)
+
+  }
+
+# This function draws the parameters describing the shape of the seasonal mean curve from the posterior of the MTfit object 
+# along with a theta value for simulation of observed counts around this mean.
+
 
 simulate_phenology.MT_df = function(phenology,days,total,n.sims){
 
@@ -183,35 +186,35 @@ simulate_phenology.MT_df = function(phenology,days,total,n.sims){
   sims = map2(models,total,~simulate_phenology(.x,days = days, total = .y, n.sims=1)) %>%
   bind_rows(.id = '.sim') %>%
   mutate(.sim = as.numeric(.sim))
-  attr(sims,'.totals')<-total
-  return(sims)
   
 }
 
-# This is an improved version of the function that takes all parameter estimates (including theta) from
-# the same posterior draw and preserves the parameter estimates in the returned object so they can 
-# be compared to those retrieved from fitting models to the simulations. NEED TO MODIFY THE MT_df VERSION 
-# NOW TO WORK AND ALSO THE as.MTdf function to make it analysable by models.
+# RETIRED VERSION
 
 #simulate_phenology.MTfit = function(phenology,days,total,n.sims,shift=0){
-
-#  sims = 
-#  MT_sample(phenology,n.sims) %>% 
-#  expand_grid(t = days) %>%
-#  mutate(mu = pmap_dbl(list(!!!rlang::parse_exprs(formalArgs('meanFnNim'))), meanFnNim)) %>%
-#  mutate(t = ((t+shift)%%365) %>% replace(.==0,365)) %>%
-#  rename(.sim = .draw,day = t) %>% 
-#  nest(data = c(day, mu)) %>%
-#  mutate(total = total,.before = alpha) %>% 
-#  mutate(data = pmap(list(data,total,phi),~mutate(..1,mu = mu/sum(mu)*..2,
-                                    N.sim = simulate_phenology(mu,..2,..3)))) %>%
-#  dplyr::select(-.chain,-.iteration) 
-
-# class(sims) <- c('MTsim',class(sims))
+#
+ #   if(!length(total) %in% c(1,n.sims)) stop("'total' should be of length = 1 or n.sims")
+  #  y = attr(phenology,'y.names')[1]   #Only select first y.var if several in same model
+  #
+   # pred = predict(phenology,samples=n.sims,days = days) %>% 
+    #       rename(.sim = .draw) %>%
+     #      subset(y.var == y) %>%
+      #     mutate(day = ((day+shift)%%365) %>% replace(.==0,365))
+   # pred = split(pred,pred$.sim)
     
-# return(sims)
+    # At the moment theta and mean predictions come from different posterior draws - this could be improved.
+   # theta = MT_sample(phenology,n.sims) %>%
+   #         subset(y.var == y) %$% phi
 
-#  }
+   # pred=
+   # pmap(list(pred,theta,total),~mutate(..1,mu = mu/sum(mu)*..3,
+   #                    sim = simulate_phenology(mu,..3,..2))) %>%
+   # bind_rows() 
+   # 
+   # class(pred) <- c('MTsim',class(pred))
+   # attr(pred,'.totals') <- total
+   # return(pred)
+# }
 
 # -------------------------------------------------------------------------------------------------------------
 # Plotting method for MTsim objects
