@@ -30,6 +30,12 @@ rename(samples,y.var=Y)
 # This currently matches column positions to argument names in meanFnNimm, but it won't work 
 # if meanFnNim has a different number of arguments e.g. a different functional form as 
 # we expand the code later.... we could this do this by collapsing the args to a list in a do.call maybe
+# This is the better way of doing this using column-argument matching:
+# MT_sample(model,samples) %>% 
+# mutate(.iter = row_number()) %>% 
+# expand_grid(t = days) %>%
+# mutate(total = pmap_dbl(list(!!!rlang::parse_exprs(formalArgs('meanFnNim'))), meanFnNim))
+# Will also enable different mean functions (models) to be passed. 
 
 predict.MTfit = function(model,days,samples = 2000){
 
@@ -41,9 +47,6 @@ predict.MTfit = function(model,days,samples = 2000){
   arg.pos = match(args,names(samples))
 
   if(missing(days)) days = min(data$day):max(data$day)
-
-  #https://stackoverflow.com/questions/58360085/r-call-function-with-data-frame-column-names-as-arguments
-  #This maybe a better way of implementing predictions if names match
   
   samples %<>%
   mutate(preds = pmap(.[arg.pos], ~map_dbl(days,function(t) meanFnNim(t,..1,..2,..3,..4,..5)))) %>%
