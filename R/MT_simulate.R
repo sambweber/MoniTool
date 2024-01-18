@@ -188,6 +188,30 @@ simulate_phenology.MT_df = function(phenology,days,total,n.sims){
   
 }
 
+# This is an improved version of the function that takes all parameter estimates (including theta) from
+# the same posterior draw and preserves the parameter estimates in the returned object so they can 
+# be compared to those retrieved from fitting models to the simulations. NEED TO MODIFY THE MT_df VERSION 
+# NOW TO WORK AND ALSO THE as.MTdf function to make it analysable by models.
+
+#simulate_phenology.MTfit = function(phenology,days,total,n.sims,shift=0){
+
+#  sims = 
+#  MT_sample(phenology,n.sims) %>% 
+#  expand_grid(t = days) %>%
+#  mutate(mu = pmap_dbl(list(!!!rlang::parse_exprs(formalArgs('meanFnNim'))), meanFnNim)) %>%
+#  mutate(t = ((t+shift)%%365) %>% replace(.==0,365)) %>%
+#  rename(.sim = .draw,day = t) %>% 
+#  nest(data = c(day, mu)) %>%
+#  mutate(total = total,.before = alpha) %>% 
+#  mutate(data = pmap(list(data,total,phi),~mutate(..1,mu = mu/sum(mu)*..2,
+                                    N.sim = simulate_phenology(mu,..2,..3)))) %>%
+#  dplyr::select(-.chain,-.iteration) 
+
+# class(sims) <- c('MTsim',class(sims))
+    
+# return(sims)
+
+#  }
 
 # -------------------------------------------------------------------------------------------------------------
 # Plotting method for MTsim objects
@@ -196,8 +220,10 @@ simulate_phenology.MT_df = function(phenology,days,total,n.sims){
 # Optionally highlights points that have been retained by a monitoring protocol applied using MT_protocol
 
 plot.MTsim = function(x){
+
+x = unnest(x,data)
   
-p = ggplot(x,aes(x = day, y=sim)) + geom_point() + geom_line(aes(y=mu), colour = 'blue') + facet_wrap(~.sim)
+p = ggplot(x,aes(x = day, y=N.sim)) + geom_point() + geom_line(aes(y=mu), colour = 'blue') + facet_wrap(~.sim)
 
 if(has_name(x,'.include')){ p = p + geom_point(data = subset(x,.include),colour='yellow',size=2) }
 
