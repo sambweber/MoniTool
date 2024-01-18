@@ -151,11 +151,11 @@ simulate_phenology.numeric = function(phenology,total,theta){
 # all parameter estimates (including theta) from the same posterior draw and preserves the parameter estimates in the 
 # returned object so they can be compared to those retrieved from fitting models to the simulations.
 
-simulate_phenology.MTfit = function(phenology,days,total,n.sims,shift=0){
-
+simulate_phenology.MTfit = function(phenology,days=1:365,total,n.sims,shift=0){
+  
 if(!length(total) %in% c(1,n.sims)) stop("'total' should be of length = 1 or n.sims")
-
-  sims = 
+  
+sims = 
   MT_sample(phenology,n.sims) %>% 
   subset(y.var == attr(phenology,'y.names')[1]) %>%
   expand_grid(t = days) %>%
@@ -165,29 +165,40 @@ if(!length(total) %in% c(1,n.sims)) stop("'total' should be of length = 1 or n.s
   nest(data = c(day, mu)) %>%
   mutate(total = total,.before = alpha) %>% 
   mutate(data = pmap(list(data,total,phi),~mutate(..1,mu = mu/sum(mu)*..2,
-                                    N.sim = simulate_phenology(mu,..2,..3)))) %>%
-  dplyr::select(-.chain,-.iteration) 
+                                                  N.sim = simulate_phenology(mu,..2,..3))))
 
- class(sims) <- c('MTsim',class(sims))
-    
- return(sims)
+parms = dplyr::select(sims,.sim,everything(),-y.var,-data,-.chain,-.iteration)
+sims = dplyr::select(sims,.sim,y.var,data) %>% unnest(data)
 
-  }
+attr(sims,'parms') <- parms
+class(sims) <- c('MTsim',class(sims))
+
+return(sims)
+
+}
 
 # This function draws the parameters describing the shape of the seasonal mean curve from the posterior of the MTfit object 
 # along with a theta value for simulation of observed counts around this mean.
-
 
 simulate_phenology.MT_df = function(phenology,days,total,n.sims,shift){
 
   if(!length(total) %in% c(1,n.sims)) stop("'total' should be of length = 1 or n.sims")
   if(!has_name(phenology,'fit')) stop ('Error')
   models = phenology$fit[sample(1:nrow(phenology),n.sims,replace=T)]
-  sims = map2(models,total,~simulate_phenology(.x,days = days, total = .y, n.sims=1,shift=shift)) %>%
-  bind_rows(.id = '.sim') %>%
-  mutate(.sim = as.numeric(.sim))
+  sims = map2(models,total,~simulate_phenology(.x,days = days, total = .y, n.sims=1,shift=shift)) 
   
-}
+  parms = bind_rows(map(sims,~attr(.x,'parms')),.id='.sim') %>%
+          mutate(.sim = as.numeric(.sim))
+  
+  sims  = bind_rows(sims,.id = '.sim') %>% 
+          mutate(.sim = as.numeric(.sim))
+  
+  attr(sims,'parms') = parms
+  class(sims) <- c('MTsim',class(sims))
+  
+  return(sims)
+}       
+   
 
 # RETIRED VERSION
 
@@ -235,7 +246,7 @@ return(p)
 
 
 # -------------------------------------------------------------------------------------------------------------
-# MT_sim2f: Conversion of an MTsim simulation to an MT_df so it can be used to fit models and evaluate outcome
+# MT_sim2df: Conversion of an MTsim simulation to an MT_df so it can be used to fit models and evaluate outcome
 # --------------------------------------------------------------------------------------------------------------
 
 MT_sim2df = function(MTsim){
