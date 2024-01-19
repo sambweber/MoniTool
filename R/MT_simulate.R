@@ -235,8 +235,6 @@ simulate_phenology.MT_df = function(phenology,days,total,n.sims,shift=0){
 
 plot.MTsim = function(x){
 
-x = unnest(x,data)
-  
 p = ggplot(x,aes(x = day, y=N.sim)) + geom_point() + geom_line(aes(y=mu), colour = 'blue') + facet_wrap(~.sim)
 
 if(has_name(x,'.include')){ p = p + geom_point(data = subset(x,.include),colour='yellow',size=2) }
