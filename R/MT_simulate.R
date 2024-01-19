@@ -252,11 +252,11 @@ return(p)
 MT_sim2df = function(MTsim){
 
 if(has_name(MTsim,'.include')) MTsim <- subset(MTsim,.include)
-x = dplyr::select(MTsim,.sim,day,y.var,sim) %>% 
-spread('y.var','sim') %>%
+x = dplyr::select(MTsim,.sim,day,y.var,N.sim) %>% 
+spread('y.var','N.sim') %>%
 mutate(window = 1) %>%
 nest(data = -.sim) %>%
-mutate(.total =  attr(MTsim,'.totals'),.after=.sim)
+left_join(nest(attr(MTsim,'parms'),sim.pars=-.sim),.,by='.sim')
 
 class(x) <- c('MT_df',class(x)[!class(x) %in% c('MTsim','MTpred')])
 
