@@ -180,7 +180,7 @@ return(sims)
 # This function draws the parameters describing the shape of the seasonal mean curve from the posterior of the MTfit object 
 # along with a theta value for simulation of observed counts around this mean.
 
-simulate_phenology.MT_df = function(phenology,days,total,n.sims,shift){
+simulate_phenology.MT_df = function(phenology,days,total,n.sims,shift=0){
 
   if(!length(total) %in% c(1,n.sims)) stop("'total' should be of length = 1 or n.sims")
   if(!has_name(phenology,'fit')) stop ('Error')
