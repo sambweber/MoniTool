@@ -8,7 +8,9 @@ require(tidybayes)
 # spread draws "[, ]" doesn't work. Dissection of the source code
 # has shown this to be the case and that replacing with sep = ', ' fixes it.
 
-MT_sample = function(model,n = 2000){
+# Use pars argument with caution - not yet fully implemented!!!!!
+
+MT_sample = function(model,n = 2000,pars){
 
 data = attr(model,'data')
 model %<>% recover_types(data)
@@ -19,8 +21,15 @@ samples = spread_draws(model,alpha[Y,beach],s1[Y,beach],s2[Y,beach]
 samples$Y <- attr(model,'y.names')[samples$Y]
 
 if(!has_name(data,'beach')) {samples$beach <- NULL}
+  
+samples = rename(samples,y.var=Y)
 
-rename(samples,y.var=Y)
+# Subsetting of specific parameters could be done much more efficiently in spread draws above 
+# but this works as quick fix. It doesn't currently respect different beaches or y.vars
+if(!missing(pars)) samples = samples[,pars,drop=TRUE]
+
+return(samples)
+  
 }
 
 # ----------------------------------------------------------------------------------
