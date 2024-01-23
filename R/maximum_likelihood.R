@@ -6,6 +6,7 @@
 # modifying to take different window lengths for grouped counts. Hessian also needs adding?
 # For 95% intervals try this.....
 # https://stackoverflow.com/questions/41541528/optimization-of-optim-in-r-l-bfgs-b-needs-finite-values-of-fn
+# https://stats.stackexchange.com/questions/27033/in-r-given-an-output-from-optim-with-a-hessian-matrix-how-to-calculate-paramet
 
 # This could be used to quicky find good initial values for the Bayesian approach, or for fast fitting. 
 
@@ -47,3 +48,8 @@ phenology_ML = function(t,N){
 # ggplot(test,aes(x=t,y=yhat)) + geom_line() + geom_point(aes(y=Y))
 # phenology_ML(test$t,test$Y)
 # It recovers the original parameters quite well with this saturation dataset...
+
+# 95% CI:
+# sigma = sqrt(diag(solve(fit$hessian)))
+# upper<-fit$par+1.96*sigma
+# lower<-fit$par-1.96*sigma
