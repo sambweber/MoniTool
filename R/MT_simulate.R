@@ -137,7 +137,7 @@ if(is(phenology,'MTfit')){
 simulate_phenology = function(x,...) UseMethod('simulate_phenology')
 
 simulate_phenology.numeric = function(phenology,total,theta){
-  if(missing(total)) total = sum(phenology)
+  if(missing(total)) total = round(sum(phenology))
   t  = length(phenology)
   w  = rgamma(t,shape=theta,scale=1/theta)
   Y = table(factor(sample(t, total, replace=TRUE,prob=phenology*w), levels=1:t)) 
