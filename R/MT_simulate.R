@@ -78,9 +78,9 @@ simulate_trend = function(init.size, length, n.sims, model = c('exp.decline'), t
 
   lapply(1:n.sims,function(x){  
   if(has.alpha){
-    y = rnbinom(length,size=theta,mu=mu)
+    y = rnbinom(length+1,size=theta,mu=mu)
   } else{
-    y = acf.negbin(length,mu=mu,size=theta,alpha=alpha,...)
+    y = acf.negbin(length+1,mu=mu,size=theta,alpha=alpha,...)
   }
   
   return(data.frame(t=parms$t,mu=mu,y=y))
