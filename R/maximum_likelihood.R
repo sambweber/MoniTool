@@ -36,7 +36,7 @@ phenology_ML = function(t,N){
   }
   
   if(error) {
-    return(NULL); print('model failed to initialize')
+    print('model failed to initialize'); return(NULL)
     } else {return(a)}
 }
 
