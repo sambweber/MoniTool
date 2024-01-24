@@ -21,6 +21,12 @@ staccato = function(x,frequency,duration){
   x%%frequency %in% 1:duration 
 }
 
+# An improved version of bolus that uses the actual numbers in x, not just their position - but this breaks the
+# MT_protocol function currently
+#bolus = function(x,start,duration){
+#x %in% unlist(map2(start,duration,~.x:(.x+.y)))
+#}
+
 # ------------------------------------------------------------------------------------------------------
 #  MT_protocol: a function for building monitoring protocols that can be applied to data
 # ------------------------------------------------------------------------------------------------------
@@ -57,8 +63,10 @@ MT_protocol.numeric = function(x, bolus, staccato, peak,
     
     if(staccato.in.block & !(missing(bolus) & missing(peak))){
       
-      start = which(diff(y)==1)+1
-      end = which(diff(y)==-1) 
+      start = c(which(y[1]),which(diff(y)==1)+1)
+      end   = c(which(diff(y)==-1),which(y[length(y)])) 
+      
+      # The indexing in this section requires fixing for the new bolus function above
       for(i in 1:length(start)){
         z = c(list(x=end[i]-start[i]+1),staccato)
         idx = start[i]:end[i]
