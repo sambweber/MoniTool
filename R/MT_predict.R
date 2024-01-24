@@ -130,7 +130,7 @@ MT_append_observed = function(preds,data){
 # plot.MTpred: plot method for MTpred
 # --------------------------------------------------------------------------------------------------------------------------------------- 
   
-plot.MTpred <- function(obj,by_site=T){
+plot.MTpred <- function(obj,by_site=T,colour = c(nests='orange',activities='blue'),shape=21){
  
 orig = na.omit(distinct(dplyr::select(obj,y.var,any_of('beach'),day,N.obs)))
 cat('Calculating mean and CI')
@@ -140,10 +140,10 @@ pl =
   ggplot(mean.line,aes(x = day,y = mu)) + 
   geom_ribbon(aes(ymin = .lower,ymax = .upper,group = y.var),alpha=.3) +
   geom_line(aes(colour=y.var)) + 
-  scale_colour_manual(values = c(nests='orange',activities='blue')) + 
+  scale_colour_manual(values = colour) + 
   ylab('Count')
 
-if(by_site & length(orig)) pl = pl + geom_point(data=orig,aes(y = N.obs,colour=y.var),shape=21)
+if(by_site & length(orig)) pl = pl + geom_point(data=orig,aes(y = N.obs,colour=y.var),shape=shape)
   
 if(has_name(mean.line,'beach')) pl + facet_wrap(~beach) else pl
 
