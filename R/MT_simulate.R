@@ -133,6 +133,7 @@ if(is(phenology,'MTfit')){
 # --------------------------------------------------------------------------------------
 
 # An improvement with methods for different kinds of objects. 
+# Builds on this post: https://stats.stackexchange.com/questions/626211/generate-sample-from-negative-binomial-distribution-with-fixed-sum/626371?noredirect=1#comment1170940_626371
 
 simulate_phenology = function(x,...) UseMethod('simulate_phenology')
 
