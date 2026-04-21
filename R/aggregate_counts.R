@@ -13,7 +13,7 @@
 
 MT_aggregate_counts = function(data,groupings){
 
-  .nest.cols = colnames(turts) %>% subset(.!='data')
+  .nest.cols = colnames(data) %>% subset(.!='data')
   
   data = unnest(data,data)
   
