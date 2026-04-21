@@ -12,6 +12,10 @@
 #  beaches 'B' and 'C'.
 
 MT_aggregate_counts = function(data,groupings){
+
+  .nest.cols = colnames(turts) %>% subset(.!='data')
+  
+  data = unnest(data,data)
   
   data = mutate(data,beach = as.character(beach))
   
@@ -34,6 +38,7 @@ MT_aggregate_counts = function(data,groupings){
       bind_rows(subset(data,!beach %in% groupings[[g]]),.)
   }
   
-  mutate(data, beach = as.factor(beach))
+  mutate(data, beach = as.factor(beach)) %>%
+  nest(data = -all_of(.nest.cols))
   
 }
