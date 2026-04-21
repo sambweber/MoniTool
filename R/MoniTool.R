@@ -85,7 +85,7 @@ MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, groups, sit
   } else data %<>% mutate(window = date-datestart)
 
  # Apply beach clustering if groups are specified
-  if(!missing(groups)){aggregate_counts(data)}
+  if(!missing(groups)){aggregate_counts(data,groups=groups)}
   
   # Remove beaches that have too few counts to be effectively modelled
   data %<>% 
