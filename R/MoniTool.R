@@ -42,7 +42,7 @@ require(magrittr)
 require(dplyr)
 require(lubridate)
 
-MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, sites.together = F){
+MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, groups, sites.together = F){
   
   if(!has_name(data,'date')) stop('Data must contain a column called date')
   data = drop_na(data,date)
@@ -83,9 +83,13 @@ MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, sites.toget
       mutate(window = map_dbl(diff(c(-1,day)),~min(.x,max.days)), datestart = date-window)
     
   } else data %<>% mutate(window = date-datestart)
+
+ # Apply beach clustering if groups are specified
+  if(!missing(groups)){aggregate_counts(data)}
   
   # Remove beaches that have too few counts to be effectively modelled
   data %<>% 
+    group_by(across(any_of(c('season','beach')))) %>%
     mutate(too_few = n()<=min.obs) %>% ungroup()
   
   if(any(data$too_few)){
@@ -126,3 +130,31 @@ set_ref_date =
     if_else(x >= ref_date,ref_date,ref_date - years(1))
   }
 
+# -----------------------------------------------------------------------------------
+# aggregate_counts
+# -----------------------------------------------------------------------------------
+
+# We only want the function to apply if all the sites in the cluster were monitored in a given season. Otherwise just return
+# the original individual beach data to model later.
+
+aggregate_counts = function(data,groups){
+  
+data = mutate(data,beach = as.character(beach))
+  
+map(1:length(groups), function(g){
+subset(data,beach %in% groups[[g]]) %>% 
+  group_by(season) %>% 
+  complete(beach,nesting(day,datestart,date,window)) %>%
+  mutate(beach = ifelse(all(groups[[g]] %in% beach),names(groups)[g],beach)) %>%
+  ungroup()
+}) %>%
+  
+bind_rows(subset(data,! beach %in% unlist(groups))) %>%
+group_by(season,beach,day,datestart,date,window) %>% 
+summarise(across(c('activities','nests'),sum)) %>%
+ungroup() %>%
+arrange(season,beach,day) %>%
+subset(!(is.na(activities) & is.na(nests))) %>%
+mutate(beach = as.factor(beach))    
+  
+}
