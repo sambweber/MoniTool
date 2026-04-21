@@ -134,8 +134,13 @@ set_ref_date =
 # aggregate_counts
 # -----------------------------------------------------------------------------------
 
-# We only want the function to apply if all the sites in the cluster were monitored in a given season. Otherwise just return
-# the original individual beach data to model later.
+# Internal function used by MT_prep to pool daily counts for beach clusters within a season. This can aid fitting for smaller nesting sites
+# with few activities and also allows comparisons to historical data where counts may have been aggregated in coarser subdivisions.
+
+# groups is a named list of beach names to include in each cluster. Aggregation will only be done if all of the sites in the group were monitored in 
+# a given season - this prevents inaccurate counts for a cluster if a particular subsite within it was not monitored. Similarly, aggregation will only be done if all beaches
+# sites in a cluster were counted on a given day. Otherwise an NA is returned and data for that day is excluded from the pooled daily counts. Again this prevents
+# errors where a site was missed for some reason.
 
 aggregate_counts = function(data,groups){
   
