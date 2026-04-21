@@ -146,8 +146,7 @@ subset(data,beach %in% groups[[g]]) %>%
   group_by(season) %>% 
   complete(beach,nesting(day,datestart,date,window,reference_date)) %>%
   mutate(check = all(groups[[g]] %in% beach)) %>%
-  rowwise() %>%
-  mutate(beach =ifelse(check,names(groups)[g],beach)) %>%
+  mutate(beach =if_else(check,names(groups)[g],beach)) %>%
   ungroup()
 }) %>%
   
