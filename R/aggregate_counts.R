@@ -30,9 +30,10 @@ MT_aggregate_counts = function(data,groupings){
     
     data %<>% 
       subset(beach %in% groupings[[g]]) %>%
-      complete(beach,nesting(day,datestart,date,window)) %>%
-      group_by(day,datestart,date,window) %>% 
+      complete(season,beach,nesting(day,datestart,date,window)) %>%
+      group_by(season,day,datestart,date,window) %>% 
       summarise(across(c('activities','nests'),sum)) %>%
+      ungroup() %>%
       mutate(beach = names(groupings)[g]) %>%
       subset(!(is.na(activities) & is.na(nests))) %>%
       bind_rows(subset(data,!beach %in% groupings[[g]]),.)
