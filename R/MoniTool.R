@@ -71,7 +71,7 @@ MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, groups, sit
 
   dups = subset(count(data,date),n>1,select=-n)
   if(nrow(dups)){
-   stop(paste(c('Duplicate survey dates found', 
+   warning(paste(c('Duplicate survey dates found', 
              capture.output(print(data.frame(dups), row.names = FALSE))), 
            collapse = "\n"))
   }
