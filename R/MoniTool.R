@@ -64,6 +64,9 @@ MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, groups, sit
     
   }
 
+  # Apply beach clustering if groups are specified
+  if(!missing(groups)){data = aggregate_counts(data,groups=groups)}
+  
   # Order observations by date and check if any duplicates
   data %<>% 
   group_by(across(any_of(c('season','beach')))) %>%
@@ -83,13 +86,9 @@ MT_prep = function(data, reference.date, max.days = 1, min.obs = 10, groups, sit
       mutate(window = map_dbl(diff(c(-1,day)),~min(.x,max.days)), datestart = date-window)
     
   } else data %<>% mutate(window = date-datestart)
-
- # Apply beach clustering if groups are specified
-  if(!missing(groups)){data = aggregate_counts(data,groups=groups)}
   
   # Remove beaches that have too few counts to be effectively modelled
   data %<>% 
-    group_by(across(any_of(c('season','beach')))) %>%
     mutate(too_few = n()<=min.obs) %>% ungroup()
   
   if(any(data$too_few)){
@@ -149,14 +148,14 @@ data = mutate(data,beach = as.character(beach))
 map(1:length(groups), function(g){
 subset(data,beach %in% groups[[g]]) %>% 
   group_by(season) %>% 
-  complete(beach,nesting(day,datestart,date,window,reference_date)) %>%
+  complete(beach,nesting(day,date,reference_date)) %>%
   mutate(check = all(groups[[g]] %in% beach)) %>%
   mutate(beach =if_else(check,names(groups)[g],beach)) %>%
   ungroup()
 }) %>%
   
 bind_rows(subset(data,! beach %in% unlist(groups))) %>%
-group_by(season,beach,day,datestart,date,window,reference_date) %>% 
+group_by(season,beach,day,date,reference_date) %>% 
 summarise(across(c('activities','nests'),sum)) %>%
 ungroup() %>%
 arrange(season,beach,day) %>%
