@@ -188,7 +188,7 @@ merge_seasons = function(obj){
   
   condense = function(.x) list(setNames(.x,.y) %>% bind_rows(.id = 'beach'))
   group_by(obj,season) %>% 
-  summarise(across(any_of(c('data','summary','predict')),/(x) condense(x,beach)),
+  summarise(across(any_of(c('data','summary','predict')),\(x) condense(x,beach)),
             across(any_of('fit'),list)) 
    
 }
