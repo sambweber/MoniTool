@@ -310,7 +310,7 @@ MT_propCI = function(preds,interval=0.95,full.posterior=F){
     mutate(nesting.success = nests/activities) %>%
       {if(!full.posterior) {
     ungroup(.,.draw) %>%
-    tidybayes::mean_qi(nesting.success,.interval=interval) %>%
+    tidybayes::mean_qi(nesting.success,.width=interval) %>%
     dplyr::select(-(.width:.interval)) 
       } else .} %>%
     ungroup()
