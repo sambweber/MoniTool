@@ -293,3 +293,28 @@ MT_propCI = function(preds,interval=0.95,full.posterior=F){
   ungroup()
   
 }
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# nesting_success: Calculates overall nesting success within seasons where both nest and activity data are available
+# ------------------------------------------------------------------------------------------------------------------
+
+  nesting_success = function(preds,by.site=T,interval = 0.95,full.posterior=F){
+
+  if(all(c('nests','activities') %in% data$y.var)){
+  
+    group_by(data,.draw,y.var) %>%
+      {if(by.site & has_name(data,'beach')) group_by(.,beach,.add=T) else .} %>%
+    summarise(N = sum(N),.groups = 'keep') %>% 
+    pivot_wider(names_from = y.var,values_from = N) %>%
+    mutate(nesting.success = nests/activities) %>%
+      {if(!full.posterior) {
+    ungroup(.,.draw) %>%
+    tidybayes::mean_qi(nesting.success,.interval=interval) %>%
+    dplyr::select(-(.width:.interval)) 
+      } else .} %>%
+    ungroup()
+    
+  } else NULL
+  
+}
