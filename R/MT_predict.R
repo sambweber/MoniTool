@@ -301,10 +301,10 @@ MT_propCI = function(preds,interval=0.95,full.posterior=F){
 
   nesting_success = function(preds,by.site=T,interval = 0.95,full.posterior=F){
 
-  if(all(c('nests','activities') %in% data$y.var)){
+  if(all(c('nests','activities') %in% preds$y.var)){
   
-    group_by(data,.draw,y.var) %>%
-      {if(by.site & has_name(data,'beach')) group_by(.,beach,.add=T) else .} %>%
+    group_by(preds,.draw,y.var) %>%
+      {if(by.site & has_name(preds,'beach')) group_by(.,beach,.add=T) else .} %>%
     summarise(N = sum(N),.groups = 'keep') %>% 
     pivot_wider(names_from = y.var,values_from = N) %>%
     mutate(nesting.success = nests/activities) %>%
